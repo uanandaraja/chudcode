@@ -1,0 +1,113 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1216;
+  --panel: #151a20;
+  --panel-2: #1b222b;
+  --border: #2a3442;
+  --text: #e8edf4;
+  --muted: #96a2b4;
+  --accent: #6ee7b7;
+  --accent-2: #67c8ff;
+  --danger: #f87171;
+  --warn: #facc15;
+  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  font-family:
+    "SF Pro Text",
+    "IBM Plex Sans",
+    "Inter",
+    sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(103, 200, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, #0f1216 0%, #0a0d11 100%);
+  color: var(--text);
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  transition:
+    border-color 120ms ease,
+    transform 120ms ease,
+    background 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent-2);
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+button[data-variant="accent"] {
+  background: linear-gradient(135deg, rgba(103, 200, 255, 0.18), rgba(110, 231, 183, 0.14));
+  border-color: rgba(103, 200, 255, 0.4);
+}
+
+button[data-variant="danger"] {
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #ffd4d4;
+}
+
+.shell {
+  width: min(1200px, calc(100vw - 2rem));
+  margin: 0 auto;
+  padding: 1rem 0 3rem;
+}
+
+.surface {
+  background: rgba(21, 26, 32, 0.82);
+  border: 1px solid rgba(42, 52, 66, 0.8);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.pill[data-state="running"] {
+  border-color: rgba(110, 231, 183, 0.35);
+  color: var(--accent);
+}
+
+.pill[data-state="paused"] {
+  border-color: rgba(250, 204, 21, 0.35);
+  color: var(--warn);
+}

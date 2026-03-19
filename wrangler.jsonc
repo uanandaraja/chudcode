@@ -1,0 +1,37 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "devbox-web",
+  "compatibility_date": "2026-03-19",
+  "compatibility_flags": [
+    "nodejs_als"
+  ],
+  "main": "worker.js",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": ".svelte-kit/cloudflare"
+  },
+  "workers_dev": true,
+  "preview_urls": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "TERMINAL_SESSIONS",
+        "class_name": "TerminalSession"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "TerminalSession"
+      ]
+    }
+  ],
+  "vars": {
+    "E2B_DOMAIN": "e2b.app",
+    "E2B_TEMPLATE": "devbox-dev",
+    "E2B_TERMINAL_PORT": "7681",
+    "E2B_SANDBOX_TIMEOUT_MS": "3600000"
+  }
+}

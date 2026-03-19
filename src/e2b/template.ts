@@ -68,6 +68,10 @@ export const template = Template()
     user: "root",
     mode: 0o644,
   })
+  .copy("runtime/terminal_proxy.py", "/usr/local/bin/terminal_proxy.py", {
+    user: "root",
+    mode: 0o755,
+  })
   .aptInstall(aptPackages)
   .runCmd(
     [
@@ -95,6 +99,7 @@ export const template = Template()
       "rm -f /tmp/nvim-linux-x86_64.tar.gz",
     ].join(" && "),
   )
+  .runCmd("python3 -m pip install --break-system-packages websockets uv")
   .runCmd("mkdir -p /etc/sudoers.d && printf 'user ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/e2b-user && chmod 440 /etc/sudoers.d/e2b-user")
   .runCmd("mkdir -p /home/user/workspace && chown -R user:user /home/user")
   .setUser("user")
@@ -104,7 +109,6 @@ export const template = Template()
   .runCmd("npm install -g @openai/codex@0.115.0 @mariozechner/pi-coding-agent@0.57.1")
   .runCmd("curl -fsSL https://claude.ai/install.sh | bash")
   .runCmd("curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path")
-  .runCmd("python3 -m pip install --user --break-system-packages uv")
   .runCmd(`printf '%s\n' '${userEnv.replaceAll("'", "'\\''")}' >> $HOME/.bashrc`)
   .runCmd("printf '\n[ -f ~/.bashrc ] && . ~/.bashrc\n' >> $HOME/.profile")
   .runCmd(
@@ -114,7 +118,7 @@ export const template = Template()
       "$HOME/.bun/bin/bun -v",
       "gh --version",
       "python3 --version",
-      "$HOME/.local/bin/uv --version",
+      "uv --version",
       "git --version",
       "nvim --version | head -n 1",
       "tmux -V",
@@ -127,5 +131,5 @@ export const template = Template()
   )
   .setStartCmd(
     "bash -lc 'sudo /usr/local/bin/start-ssh-stack.sh && exec sleep infinity'",
-    waitForFile("/tmp/e2b-ssh-ready"),
+    waitForFile("/tmp/e2b-ready"),
   );

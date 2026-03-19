@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+import asyncio
+import json
+import os
+import pwd
+import pty
+import shlex
+import signal
+import subprocess
+import termios
+from fcntl import ioctl
+from pathlib import Path
+from struct import pack
+
+import websockets
+
+
+PORT = int(os.environ.get("E2B_TERMINAL_PORT", "7681"))
+WORKDIR = os.environ.get("DEVBOX_CWD", "/home/user/workspace")
+COMMAND = os.environ.get("DEVBOX_TERMINAL_COMMAND", "bash -l")
+
+
+def set_winsize(fd: int, rows: int, cols: int) -> None:
+    ioctl(fd, termios.TIOCSWINSZ, pack("HHHH", rows, cols, 0, 0))
+
+
+def shell_env() -> dict[str, str]:
+    env = os.environ.copy()
+    user = pwd.getpwuid(os.getuid())
+    term = env.get("TERM")
+
+    env["HOME"] = user.pw_dir
+    env["USER"] = user.pw_name
+    env["LOGNAME"] = user.pw_name
+    env["SHELL"] = env.get("SHELL", "/bin/bash")
+    env["TERM"] = (
+        "xterm-256color"
+        if not term or term in {"unknown", "dumb"}
+        else term
+    )
+    env["COLORTERM"] = env.get("COLORTERM") or "truecolor"
+
+    return env
+
+
+async def handle_terminal(websocket):
+    master_fd, slave_fd = pty.openpty()
+    set_winsize(slave_fd, 24, 80)
+
+    process = subprocess.Popen(
+        ["bash", "-lc", f"cd {shlex.quote(WORKDIR)} && exec {COMMAND}"],
+        stdin=slave_fd,
+        stdout=slave_fd,
+        stderr=slave_fd,
+        start_new_session=True,
+        cwd=WORKDIR,
+        env=shell_env(),
+    )
+    os.close(slave_fd)
+
+    loop = asyncio.get_running_loop()
+
+    async def pty_to_socket():
+        while True:
+            data = await loop.run_in_executor(None, os.read, master_fd, 4096)
+            if not data:
+                break
+            await websocket.send(data)
+
+    async def socket_to_pty():
+        async for message in websocket:
+            if isinstance(message, bytes):
+                os.write(master_fd, message)
+                continue
+
+            payload = json.loads(message)
+            kind = payload.get("type")
+            if kind == "input":
+                os.write(master_fd, payload.get("data", "").encode())
+            elif kind == "resize":
+                set_winsize(
+                    master_fd,
+                    int(payload.get("rows", 24)),
+                    int(payload.get("cols", 80)),
+                )
+
+    try:
+        await asyncio.gather(pty_to_socket(), socket_to_pty())
+    finally:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        os.close(master_fd)
+
+
+async def main():
+    Path("/tmp").mkdir(parents=True, exist_ok=True)
+    async with websockets.serve(handle_terminal, "0.0.0.0", PORT, max_size=None):
+        Path("/tmp/e2b-terminal-ready").touch()
+        await asyncio.Future()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -1,16 +1,31 @@
 {
+  "extends": "./.svelte-kit/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "rewriteRelativeImportExtensions": true,
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
     "strict": true,
-    "noEmit": true,
     "types": [
-      "bun-types"
-    ],
-    "skipLibCheck": true
+      "./worker-configuration.d.ts"
+    ]
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.js",
+    "src/**/*.svelte",
+    "worker-configuration.d.ts",
+    "vite.config.ts",
+    "svelte.config.js"
+  ],
+  "exclude": [
+    "src/e2b/**/*.ts",
+    "src/cloudflare/**/*.ts"
   ]
 }
