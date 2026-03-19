@@ -29,6 +29,7 @@
   let socket: WebSocket | null = null;
   let resizeObserver: ResizeObserver | null = null;
   let ghosttyReady = false;
+  let focusRun = 0;
 
   function cssVar(name: string, fallback: string) {
     if (typeof document === "undefined") return fallback;
@@ -53,22 +54,32 @@
     socket.send(JSON.stringify({ type: "resize", cols: xterm.cols, rows: xterm.rows }));
   }
 
-  function focusTerminal() {
-    if (!xterm) return;
+  async function syncActiveTerminal() {
+    if (!active || !xterm) return;
 
-    terminalElement?.focus();
-    xterm.focus();
+    const currentRun = ++focusRun;
+
+    await tick();
+
+    if (currentRun !== focusRun || !active || !xterm) return;
 
     requestAnimationFrame(() => {
-      xterm?.focus();
-    });
-  }
+      if (currentRun !== focusRun || !active || !xterm) return;
 
-  function syncActiveTerminal() {
-    if (!active || !xterm) return;
-    fitAddon?.fit();
-    sendResize();
-    focusTerminal();
+      fitAddon?.fit();
+      sendResize();
+      terminalElement?.focus();
+      xterm.textarea?.focus();
+      xterm.focus();
+
+      requestAnimationFrame(() => {
+        if (currentRun !== focusRun || !active || !xterm) return;
+
+        xterm.textarea?.focus();
+        xterm.focus();
+        sendResize();
+      });
+    });
   }
 
   async function openTerminal() {
@@ -90,7 +101,7 @@
     socket.onopen = () => {
       if (!xterm) return;
       terminalState = "open";
-      syncActiveTerminal();
+      void syncActiveTerminal();
       resizeObserver = new ResizeObserver(() => {
         fitAddon?.fit();
         sendResize();
@@ -223,7 +234,7 @@
 
   $effect(() => {
     if (ghosttyReady && active && xterm) {
-      syncActiveTerminal();
+      void syncActiveTerminal();
     }
   });
 </script>
