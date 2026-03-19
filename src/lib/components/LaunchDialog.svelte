@@ -74,12 +74,12 @@
     <div class="mb-5 rounded-lg border border-white/[0.07] bg-white/[0.03] p-4">
       <p class="mb-2 text-sm font-semibold text-foreground">{workspace.name}</p>
       <div class="space-y-1.5">
-        <div class="flex items-center gap-2 text-xs text-foreground/50">
+        <div class="flex items-center gap-2 text-sm text-foreground/50">
           <GithubLogo class="size-3.5" />
           <span class="font-mono">{workspace.owner}/{workspace.repo}</span>
         </div>
         {#if workspace.defaultBranch}
-          <div class="flex items-center gap-2 text-xs text-foreground/50">
+          <div class="flex items-center gap-2 text-sm text-foreground/50">
             <GitBranch class="size-3.5" />
             <span class="font-mono">{workspace.defaultBranch}</span>
           </div>

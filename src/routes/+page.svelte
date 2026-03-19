@@ -38,7 +38,7 @@
       <!-- No workspaces yet -->
       <div class="text-center">
         <p class="text-sm text-foreground/40">No workspaces yet.</p>
-        <p class="mt-1 text-xs text-foreground/25">
+        <p class="mt-1 text-sm text-foreground/25">
           Use the <span class="font-mono">+</span> in the sidebar to add one.
         </p>
       </div>
@@ -46,7 +46,7 @@
       <!-- Has workspaces, just nothing selected -->
       <div class="text-center">
         <p class="text-sm text-foreground/35">Select a sandbox from the sidebar</p>
-        <p class="mt-1 text-xs text-foreground/25">or launch a new one from a workspace.</p>
+        <p class="mt-1 text-sm text-foreground/25">or launch a new one from a workspace.</p>
       </div>
     {/if}
   </div>

@@ -92,7 +92,7 @@
     </div>
 
     {#if workspaces.length === 0}
-      <div class="px-3 py-3 text-xs text-foreground/30">No workspaces yet.</div>
+      <div class="px-3 py-3 text-sm text-foreground/30">No workspaces yet.</div>
     {/if}
 
     {#each workspaces as workspace (workspace.id)}
