@@ -67,8 +67,7 @@ async function e2bFetch<T>(env: PlatformEnv, path: string, init?: RequestInit): 
 
 async function listSandboxesPage(env: PlatformEnv, nextToken?: string) {
   const params = new URLSearchParams();
-  params.append("state", "running");
-  params.append("state", "paused");
+  params.set("state", "running,paused");
   params.set("limit", "100");
 
   if (nextToken) {
