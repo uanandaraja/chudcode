@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mkdir -p /run/sshd /var/log/e2b /home/user/.ssh /home/user/.cache/devbox
+mkdir -p /run/sshd /var/log/e2b /home/user/.ssh /home/user/.cache/werkbench
 rm -f /tmp/e2b-ssh-ready /tmp/e2b-terminal-ready /tmp/e2b-ready
 chmod 700 /home/user/.ssh
-chown -R user:user /home/user/.ssh /home/user/.cache/devbox
+chown -R user:user /home/user/.ssh /home/user/.cache/werkbench
 
 if [ -n "${E2B_SSH_AUTHORIZED_KEY:-}" ]; then
   printf '%s\n' "${E2B_SSH_AUTHORIZED_KEY}" > /home/user/.ssh/authorized_keys
@@ -12,13 +12,13 @@ if [ -n "${E2B_SSH_AUTHORIZED_KEY:-}" ]; then
   chown user:user /home/user/.ssh/authorized_keys
 fi
 
-BOOTSTRAP_MARKER="/home/user/.cache/devbox/bootstrap.done"
-BOOTSTRAP_CWD="${DEVBOX_CWD:-/home/user/workspace}"
+BOOTSTRAP_MARKER="/home/user/.cache/werkbench/bootstrap.done"
+BOOTSTRAP_CWD="${WERKBENCH_CWD:-/home/user/workspace}"
 USER_HOME="/home/user"
 USER_NAME="user"
-REPO_OWNER="${DEVBOX_REPO_OWNER:-}"
-REPO_NAME="${DEVBOX_REPO_NAME:-}"
-REPO_DEFAULT_BRANCH="${DEVBOX_REPO_DEFAULT_BRANCH:-}"
+REPO_OWNER="${WERKBENCH_REPO_OWNER:-}"
+REPO_NAME="${WERKBENCH_REPO_NAME:-}"
+REPO_DEFAULT_BRANCH="${WERKBENCH_REPO_DEFAULT_BRANCH:-}"
 REPO_URL=""
 REPO_DIR="${BOOTSTRAP_CWD}"
 
@@ -39,14 +39,14 @@ sudo -u "${USER_NAME}" env \
     && if [ -n \"${GH_TOKEN:-}\" ]; then gh auth setup-git >/dev/null 2>&1 || true; fi" \
   >/var/log/e2b/github-auth.log 2>&1
 
-if [ -n "${DEVBOX_BOOTSTRAP_COMMAND:-}" ] && [ ! -f "${BOOTSTRAP_MARKER}" ]; then
+if [ -n "${WERKBENCH_BOOTSTRAP_COMMAND:-}" ] && [ ! -f "${BOOTSTRAP_MARKER}" ]; then
   sudo -u "${USER_NAME}" env \
     HOME="${USER_HOME}" \
     USER="${USER_NAME}" \
     LOGNAME="${USER_NAME}" \
-    DEVBOX_CWD="${BOOTSTRAP_CWD}" \
+    WERKBENCH_CWD="${BOOTSTRAP_CWD}" \
     bash -lc \
-    "cd \"${BOOTSTRAP_CWD}\" && ${DEVBOX_BOOTSTRAP_COMMAND}" \
+    "cd \"${BOOTSTRAP_CWD}\" && ${WERKBENCH_BOOTSTRAP_COMMAND}" \
     >/var/log/e2b/bootstrap.log 2>&1
   touch "${BOOTSTRAP_MARKER}"
   chown "${USER_NAME}:${USER_NAME}" "${BOOTSTRAP_MARKER}"

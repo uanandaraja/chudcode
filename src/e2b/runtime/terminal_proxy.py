@@ -16,12 +16,12 @@ import websockets
 
 
 PORT = int(os.environ.get("E2B_TERMINAL_PORT", "7681"))
-DEFAULT_WORKDIR = os.environ.get("DEVBOX_CWD", "/home/user/workspace")
-DEFAULT_COMMAND = os.environ.get("DEVBOX_TERMINAL_COMMAND", "bash -l")
+DEFAULT_WORKDIR = os.environ.get("WERKBENCH_CWD", "/home/user/workspace")
+DEFAULT_COMMAND = os.environ.get("WERKBENCH_TERMINAL_COMMAND", "bash -l")
 SESSION_CONFIG_PATH = Path(
     os.environ.get(
-        "DEVBOX_TERMINAL_CONFIG_PATH",
-        "/home/user/.cache/devbox/terminal-session.json",
+        "WERKBENCH_TERMINAL_CONFIG_PATH",
+        "/home/user/.cache/werkbench/terminal-session.json",
     )
 )
 

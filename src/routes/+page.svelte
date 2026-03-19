@@ -47,7 +47,7 @@
 </script>
 
 <svelte:head>
-  <title>Devbox</title>
+  <title>Werkbench</title>
 </svelte:head>
 
 {#if openSandboxes.length > 0}
@@ -104,7 +104,7 @@
       <h1
         class="font-mono text-[clamp(2rem,6vw,4rem)] font-black tracking-[0.3em] text-foreground/[0.07]"
       >
-        DEVBOX
+        WERKBENCH
       </h1>
     </div>
 

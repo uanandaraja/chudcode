@@ -1,6 +1,6 @@
 {
 	"$schema": "./node_modules/wrangler/config-schema.json",
-	"name": "devbox-web",
+	"name": "werkbench",
 	"compatibility_date": "2026-03-19",
 	"compatibility_flags": [
 		"nodejs_compat",
@@ -16,7 +16,7 @@
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "devbox-web",
+			"database_name": "werkbench",
 			"database_id": "96df8513-cdbb-44f9-8a33-52ea8000943e",
 			"preview_database_id": "96df8513-cdbb-44f9-8a33-52ea8000943e",
 			"migrations_dir": "drizzle",
@@ -43,7 +43,7 @@
 		"E2B_DOMAIN": "e2b.app",
 		"E2B_DESKTOP_PORT": "6901",
 		"E2B_DESKTOP_WEB_PORT": "6902",
-		"E2B_TEMPLATE": "devbox-dev",
+		"E2B_TEMPLATE": "werkbench-dev",
 		"E2B_TERMINAL_PORT": "7681",
 		"E2B_SANDBOX_TIMEOUT_MS": "3600000"
 	}

@@ -6,14 +6,14 @@ import type {
   ListedSandbox,
   SandboxDetail,
   Workspace,
-} from "$lib/devbox/types";
+} from "$lib/werkbench/types";
 import type { PlatformEnv, WorkspaceLaunchEnv } from "$lib/server/env";
 
 const defaultDesktopPort = 6901;
 const defaultDesktopWebPort = 6902;
 const defaultDomain = "e2b.app";
 const defaultTerminalPort = 7681;
-const desktopUsername = "devbox";
+const desktopUsername = "werkbench";
 
 function getDomain(env: PlatformEnv) {
   return env.E2B_DOMAIN || defaultDomain;
@@ -166,8 +166,8 @@ async function provisionWorkspaceSandbox(
     timeoutMs: getDefaultTimeoutMs(env),
   });
   const bootstrapSteps = [
-    "mkdir -p /home/user/.cache/devbox /home/user/workspace",
-    `printf '%s' ${shellEscape(terminalConfig)} > /home/user/.cache/devbox/terminal-session.json`,
+    "mkdir -p /home/user/.cache/werkbench /home/user/workspace",
+    `printf '%s' ${shellEscape(terminalConfig)} > /home/user/.cache/werkbench/terminal-session.json`,
     "mkdir -p /home/user/.config/gh",
     `if [ ! -f /home/user/.config/gh/hosts.yml ]; then printf '%s' \"$GITHUB_TOKEN\" | env -u GH_TOKEN -u GITHUB_TOKEN gh auth login --with-token --hostname github.com --git-protocol https --insecure-storage; fi`,
     "git config --global --unset-all credential.helper >/dev/null 2>&1 || true",
@@ -212,7 +212,7 @@ export async function createSandbox(env: WorkspaceLaunchEnv, workspace: Workspac
       timeout: getTimeoutSeconds(timeoutMs),
       autoPause: true,
       metadata: {
-        kind: "devbox",
+        kind: "werkbench",
         workspaceId: workspace.id,
         workspaceName: workspace.name,
         repoOwner: workspace.owner,

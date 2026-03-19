@@ -5,12 +5,12 @@
     FitAddon as GhosttyFitAddon,
     Terminal as GhosttyTerminal,
   } from "ghostty-web";
-  import type { DesktopSession, ListedSandbox } from "$lib/devbox/types";
+  import type { DesktopSession, ListedSandbox } from "$lib/werkbench/types";
   import {
     killSandboxCommand,
     pauseSandboxCommand,
     resumeSandboxCommand,
-  } from "$lib/remote/devbox.remote";
+  } from "$lib/remote/werkbench.remote";
   import { Button } from "$lib/components/ui/button/index.js";
   import {
     ArrowCounterClockwise,

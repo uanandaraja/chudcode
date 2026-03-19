@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "devbox-e2b",
+      "name": "werkbench-e2b",
       "dependencies": {
         "@tailwindcss/vite": "^4.2.2",
         "class-variance-authority": "^0.7.1",

@@ -1,7 +1,7 @@
 import { Sandbox } from "e2b";
 import { readAuthorizedKey, sshProxyPort, sshUser } from "./ssh-settings";
 
-const template = Bun.argv[2] ?? process.env.E2B_TEMPLATE ?? "devbox-dev";
+const template = Bun.argv[2] ?? process.env.E2B_TEMPLATE ?? "werkbench-dev";
 const timeoutMs = Number(process.env.E2B_SANDBOX_TIMEOUT_MS ?? 3600000);
 const authorizedKey = await readAuthorizedKey();
 
