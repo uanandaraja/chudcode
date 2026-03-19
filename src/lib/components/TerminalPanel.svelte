@@ -189,11 +189,11 @@
 
 <div class="flex h-full flex-col bg-background">
   <!-- Top bar -->
-  <div class="flex h-10 flex-shrink-0 items-center justify-between border-b border-white/[0.06] px-4">
+  <div class="flex h-10 flex-shrink-0 items-center justify-between border-b border-sidebar-divider px-4">
     <div class="flex items-center gap-3">
       <span class="font-mono text-sm text-foreground/60">{sandbox.sandboxID}</span>
       <div
-        class="size-1.5 rounded-full {sandbox.state === 'running' ? 'bg-emerald-400' : 'bg-amber-400'}"
+        class="size-1.5 rounded-full {sandbox.state === 'running' ? 'bg-status-running' : 'bg-status-paused'}"
       ></div>
       <span class="text-sm text-foreground/40 capitalize">{sandbox.state}</span>
       {#if terminalState === "connecting"}
@@ -203,7 +203,7 @@
       {:else if terminalState === "closed"}
         <span class="text-sm text-foreground/30">disconnected</span>
       {:else if terminalState === "error"}
-        <span class="text-sm text-red-400/70">error</span>
+        <span class="text-sm text-destructive/70">error</span>
       {/if}
     </div>
 
@@ -233,7 +233,7 @@
         variant="ghost"
         onclick={handleKill}
         disabled={actionPending}
-        class="text-red-400/70 hover:text-red-400"
+        class="text-destructive/70 hover:text-destructive"
         title="Kill sandbox"
       >
         <Trash class="size-3.5" />
@@ -243,7 +243,7 @@
 
   <!-- Error banner -->
   {#if actionError}
-    <div class="flex items-center gap-2 border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+    <div class="flex items-center gap-2 border-b border-destructive/20 bg-destructive/10 px-4 py-2 text-sm text-destructive">
       <WarningCircle class="size-3.5 flex-shrink-0" />
       {actionError}
     </div>

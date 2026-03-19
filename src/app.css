@@ -6,7 +6,7 @@
   --foreground: oklch(0.9219 0 0);
   --card: oklch(0.2264 0 0);
   --card-foreground: oklch(0.9219 0 0);
-  --popover: oklch(0.2264 0 0);
+  --popover: oklch(0.17 0 0);
   --popover-foreground: oklch(0.9219 0 0);
   --primary: oklch(0.9219 0 0);
   --primary-foreground: oklch(0.2264 0 0);
@@ -27,7 +27,7 @@
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
   --radius: 0.75rem;
-  --sidebar: oklch(0.2264 0 0);
+  --sidebar: oklch(0.15 0 0);
   --sidebar-foreground: oklch(0.9219 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.9219 0 0);
@@ -35,6 +35,7 @@
   --sidebar-accent-foreground: oklch(0.9219 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-divider: oklch(1 0 0 / 6%);
   --input-height: 2.25rem;
   --success: oklch(0.7 0.18 145);
   --success-foreground: oklch(0.2264 0 0);
@@ -51,6 +52,20 @@
   --terminal-foreground: oklch(0.94 0.01 250);
   --terminal-cursor: oklch(0.9219 0 0);
   --terminal-selection: oklch(0.556 0 0 / 0.24);
+  --overlay: oklch(0 0 0 / 50%);
+  --field: oklch(1 0 0 / 5%);
+  --field-focus: oklch(1 0 0 / 20%);
+  --surface-hover: oklch(1 0 0 / 7%);
+  --surface-selected: oklch(1 0 0 / 8%);
+  --status-running: oklch(0.74 0.17 145);
+  --status-paused: oklch(0.77 0.15 75);
+  --avatar-1: oklch(0.62 0.18 250);
+  --avatar-2: oklch(0.62 0.18 150);
+  --avatar-3: oklch(0.62 0.18 35);
+  --avatar-4: oklch(0.62 0.18 300);
+  --avatar-5: oklch(0.62 0.18 200);
+  --avatar-6: oklch(0.62 0.18 50);
+  --avatar-7: oklch(0.62 0.18 330);
 }
 
 @theme inline {
@@ -92,8 +107,16 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-divider: var(--sidebar-divider);
   --color-page-edge: var(--page-edge);
   --color-page-panel: var(--page-panel);
+  --color-overlay: var(--overlay);
+  --color-field: var(--field);
+  --color-field-focus: var(--field-focus);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-selected: var(--surface-selected);
+  --color-status-running: var(--status-running);
+  --color-status-paused: var(--status-paused);
   --color-terminal-background: var(--terminal-background);
   --color-terminal-foreground: var(--terminal-foreground);
   --radius-sm: calc(var(--radius) - 4px);

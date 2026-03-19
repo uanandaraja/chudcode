@@ -38,18 +38,9 @@
   }
 
   function avatarColor(name: string) {
-    const colors = [
-      "oklch(0.62 0.18 250)",
-      "oklch(0.62 0.18 150)",
-      "oklch(0.62 0.18 35)",
-      "oklch(0.62 0.18 300)",
-      "oklch(0.62 0.18 200)",
-      "oklch(0.62 0.18 50)",
-      "oklch(0.62 0.18 330)",
-    ];
     let hash = 0;
     for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) & 0xffff;
-    return colors[hash % colors.length];
+    return `var(--avatar-${(hash % 7) + 1})`;
   }
 
   function toggleWorkspace(id: string) {
@@ -67,9 +58,9 @@
   }
 </script>
 
-<aside class="flex w-64 flex-shrink-0 flex-col border-r border-white/[0.06] bg-[oklch(0.15_0_0)]">
+<aside class="flex w-64 flex-shrink-0 flex-col border-r border-sidebar-divider bg-sidebar">
   <!-- Logo -->
-  <div class="flex h-11 items-center border-b border-white/[0.06] px-4">
+  <div class="flex h-11 items-center border-b border-sidebar-divider px-4">
     <div class="flex items-center gap-2">
       <Terminal class="size-4 text-foreground/60" />
       <span class="font-mono text-sm font-semibold tracking-[0.15em] text-foreground/80">DEVBOX</span>
@@ -85,7 +76,7 @@
       <button
         onclick={onAddWorkspace}
         title="Add workspace"
-        class="flex size-4 items-center justify-center rounded text-foreground/35 transition-colors hover:bg-white/[0.07] hover:text-foreground/70"
+        class="flex size-4 items-center justify-center rounded text-foreground/35 transition-colors hover:bg-surface-hover hover:text-foreground/70"
       >
         <Plus class="size-3" />
       </button>
@@ -104,7 +95,7 @@
         <div class="group flex items-center gap-1">
           <button
             onclick={() => toggleWorkspace(workspace.id)}
-            class="flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/[0.05]"
+            class="flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-field"
           >
             <div
               class="flex size-5 flex-shrink-0 items-center justify-center rounded text-[11px] font-bold text-black/70"
@@ -125,11 +116,11 @@
 
         <!-- Expanded: sandboxes + launch button -->
         {#if isExpanded}
-          <div class="ml-[1.125rem] border-l border-white/[0.06] pl-3">
+          <div class="ml-[1.125rem] border-l border-sidebar-divider pl-3">
             <!-- New sandbox button -->
             <button
               onclick={() => onLaunchWorkspace(workspace)}
-              class="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-[11px] text-foreground/35 transition-colors hover:bg-white/[0.05] hover:text-foreground/60"
+              class="flex w-full items-center gap-1.5 rounded-md px-2 py-1 text-left text-[11px] text-foreground/35 transition-colors hover:bg-field hover:text-foreground/60"
             >
               <Plus class="size-3" />
               New sandbox
@@ -141,13 +132,13 @@
               <button
                 onclick={() => selectSandbox(sandbox.sandboxID)}
                 class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors {isSelected
-                  ? 'bg-white/[0.08] text-foreground'
-                  : 'text-foreground/45 hover:bg-white/[0.04] hover:text-foreground/70'}"
+                  ? 'bg-surface-selected text-foreground'
+                  : 'text-foreground/45 hover:bg-field/80 hover:text-foreground/70'}"
               >
                 <div
                   class="size-1.5 flex-shrink-0 rounded-full {sandbox.state === 'running'
-                    ? 'bg-emerald-400'
-                    : 'bg-amber-400'}"
+                    ? 'bg-status-running'
+                    : 'bg-status-paused'}"
                 ></div>
                 <span class="flex-1 truncate font-mono text-[11px]">
                   {sandbox.metadata?.repoOwner ?? "?"}/{sandbox.metadata?.repoName ??
@@ -166,10 +157,10 @@
   </div>
 
   <!-- Bottom -->
-  <div class="border-t border-white/[0.06] p-2">
+  <div class="border-t border-sidebar-divider p-2">
     <button
       onclick={onAddWorkspace}
-      class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] text-foreground/40 transition-colors hover:bg-white/[0.05] hover:text-foreground/70"
+      class="flex w-full items-center gap-2 rounded-md px-3 py-2 text-[13px] text-foreground/40 transition-colors hover:bg-field hover:text-foreground/70"
     >
       <Plus class="size-3.5" />
       Add workspace

@@ -49,7 +49,7 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-sm"
   onclick={handleBackdropClick}
   onkeydown={handleBackdropKeydown}
   tabindex="0"
@@ -57,21 +57,21 @@
   aria-modal="true"
   aria-label="Launch sandbox"
 >
-  <div class="w-full max-w-sm rounded-xl border border-white/[0.1] bg-[oklch(0.17_0_0)] p-6 shadow-2xl">
+  <div class="w-full max-w-sm rounded-xl border border-border bg-popover p-6 shadow-2xl">
     <!-- Header -->
     <div class="mb-5 flex items-center justify-between">
       <h2 class="text-base font-semibold text-foreground">Launch sandbox</h2>
       <button
         onclick={onClose}
         disabled={pending}
-        class="flex size-7 items-center justify-center rounded-md text-foreground/40 transition-colors hover:bg-white/[0.07] hover:text-foreground disabled:pointer-events-none"
+        class="flex size-7 items-center justify-center rounded-md text-foreground/40 transition-colors hover:bg-surface-hover hover:text-foreground disabled:pointer-events-none"
       >
         <X class="size-4" />
       </button>
     </div>
 
     <!-- Workspace info -->
-    <div class="mb-5 rounded-lg border border-white/[0.07] bg-white/[0.03] p-4">
+    <div class="mb-5 rounded-lg border border-border/70 bg-border/30 p-4">
       <p class="mb-2 text-sm font-semibold text-foreground">{workspace.name}</p>
       <div class="space-y-1.5">
         <div class="flex items-center gap-2 text-sm text-foreground/50">
@@ -90,7 +90,7 @@
     <!-- Error -->
     {#if error}
       <div
-        class="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+        class="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive"
       >
         {error}
       </div>

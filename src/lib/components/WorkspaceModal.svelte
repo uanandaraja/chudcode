@@ -17,9 +17,9 @@
   const isEditing = $derived(workspace !== null);
 
   const fieldClass =
-    "flex h-9 w-full rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 text-sm outline-none transition placeholder:text-foreground/25 focus:border-white/20 focus:ring-1 focus:ring-white/10";
+    "flex h-9 w-full rounded-lg border border-border bg-field px-3 text-sm outline-none transition placeholder:text-foreground/25 focus:border-field-focus focus:ring-1 focus:ring-border";
   const textareaClass =
-    "flex min-h-20 w-full rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-sm outline-none transition placeholder:text-foreground/25 focus:border-white/20 focus:ring-1 focus:ring-white/10 resize-none";
+    "flex min-h-20 w-full rounded-lg border border-border bg-field px-3 py-2 text-sm outline-none transition placeholder:text-foreground/25 focus:border-field-focus focus:ring-1 focus:ring-border resize-none";
 
   function toDisplayName(repoUrl: string) {
     const normalized = repoUrl.trim().replace(/\/+$/, "");
@@ -127,7 +127,7 @@
 <svelte:window onkeydown={handleKeydown} />
 
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-sm"
   onclick={handleBackdropClick}
   onkeydown={handleBackdropKeydown}
   tabindex="0"
@@ -135,7 +135,7 @@
   aria-modal="true"
   aria-label={isEditing ? "Edit workspace" : "New workspace"}
 >
-  <div class="w-full max-w-md rounded-xl border border-white/[0.1] bg-[oklch(0.17_0_0)] p-6 shadow-2xl">
+  <div class="w-full max-w-md rounded-xl border border-border bg-popover p-6 shadow-2xl">
     <!-- Header -->
     <div class="mb-5 flex items-center justify-between">
       <h2 class="text-base font-semibold text-foreground">
@@ -143,7 +143,7 @@
       </h2>
       <button
         onclick={onClose}
-        class="flex size-7 items-center justify-center rounded-md text-foreground/40 transition-colors hover:bg-white/[0.07] hover:text-foreground"
+        class="flex size-7 items-center justify-center rounded-md text-foreground/40 transition-colors hover:bg-surface-hover hover:text-foreground"
       >
         <X class="size-4" />
       </button>
@@ -152,7 +152,7 @@
     <!-- Error -->
     {#if error}
       <div
-        class="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400"
+        class="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive"
       >
         {error}
       </div>
