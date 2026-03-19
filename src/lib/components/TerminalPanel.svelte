@@ -1,9 +1,7 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { invalidateAll } from "$app/navigation";
-  import { FitAddon } from "@xterm/addon-fit";
-  import { Terminal } from "@xterm/xterm";
-  import "@xterm/xterm/css/xterm.css";
+  import type { FitAddon as GhosttyFitAddon, Terminal as GhosttyTerminal } from "ghostty-web";
   import type { ListedSandbox } from "$lib/devbox/types";
   import { killSandboxCommand, pauseSandboxCommand, resumeSandboxCommand } from "$lib/remote/devbox.remote";
   import { Badge } from "$lib/components/ui/badge/index.js";
@@ -24,10 +22,11 @@
   let actionPending = $state(false);
   let actionError = $state("");
 
-  let xterm: Terminal | null = null;
-  let fitAddon: FitAddon | null = null;
+  let xterm: GhosttyTerminal | null = null;
+  let fitAddon: GhosttyFitAddon | null = null;
   let socket: WebSocket | null = null;
   let resizeObserver: ResizeObserver | null = null;
+  let ghosttyReady = false;
 
   function cssVar(name: string, fallback: string) {
     if (typeof document === "undefined") return fallback;
@@ -146,42 +145,59 @@
   onMount(() => {
     if (!terminalElement) return;
 
-    xterm = new Terminal({
-      convertEol: true,
-      cursorBlink: true,
-      fontFamily: cssVar("--font-mono", "ui-monospace, monospace"),
-      fontSize: 13,
-      theme: {
-        background: cssVar("--terminal-background", "#0b0f14"),
-        foreground: cssVar("--terminal-foreground", "#edf4ff"),
-        cursor: cssVar("--terminal-cursor", "#9ca3af"),
-        selectionBackground: cssVar("--terminal-selection", "rgba(103, 200, 255, 0.22)"),
-      },
-    });
+    let disposed = false;
 
-    fitAddon = new FitAddon();
-    xterm.loadAddon(fitAddon);
-    xterm.open(terminalElement);
-    fitAddon.fit();
+    void (async () => {
+      const { Terminal, FitAddon, init } = await import("ghostty-web");
 
-    xterm.onData((input) => {
-      if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ type: "input", data: input }));
+      await init();
+      if (disposed || !terminalElement) return;
+
+      ghosttyReady = true;
+      xterm = new Terminal({
+        convertEol: true,
+        cursorBlink: true,
+        fontFamily: cssVar("--font-mono", "ui-monospace, monospace"),
+        fontSize: 13,
+        theme: {
+          background: cssVar("--terminal-background", "#0b0f14"),
+          foreground: cssVar("--terminal-foreground", "#edf4ff"),
+          cursor: cssVar("--terminal-cursor", "#9ca3af"),
+          selectionBackground: cssVar("--terminal-selection", "rgba(103, 200, 255, 0.22)"),
+        },
+      });
+
+      fitAddon = new FitAddon();
+      xterm.loadAddon(fitAddon);
+      xterm.open(terminalElement);
+      fitAddon.fit();
+
+      xterm.onData((input) => {
+        if (socket?.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: "input", data: input }));
+        }
+      });
+
+      if (sandbox.state === "running") {
+        await openTerminal();
       }
+    })().catch((error) => {
+      terminalState = "error";
+      terminalError = error instanceof Error ? error.message : "Failed to initialize terminal";
     });
-
-    if (sandbox.state === "running") void openTerminal();
 
     return () => {
+      disposed = true;
       cleanupSocket();
       xterm?.dispose();
       xterm = null;
       fitAddon = null;
+      ghosttyReady = false;
     };
   });
 
   $effect(() => {
-    if (sandbox.state === "running" && terminalState === "idle" && xterm) {
+    if (ghosttyReady && sandbox.state === "running" && terminalState === "idle" && xterm) {
       void openTerminal();
     }
   });
@@ -191,7 +207,6 @@
   <!-- Top bar -->
   <div class="flex h-10 flex-shrink-0 items-center justify-between border-b border-sidebar-divider px-4">
     <div class="flex items-center gap-3">
-      <span class="hidden font-mono text-sm text-foreground/60 md:inline">{sandbox.sandboxID}</span>
       <div
         class="size-1.5 rounded-full {sandbox.state === 'running' ? 'bg-status-running' : 'bg-status-paused'}"
       ></div>

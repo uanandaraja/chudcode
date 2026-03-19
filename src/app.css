@@ -168,13 +168,15 @@
     color: var(--terminal-foreground);
   }
 
-  .terminal-shell .xterm,
-  .terminal-shell .xterm-viewport,
-  .terminal-shell .xterm-screen {
+  .terminal-shell,
+  .terminal-shell > div,
+  .terminal-shell canvas {
     background-color: var(--terminal-background);
   }
 
-  .terminal-shell .xterm-viewport {
-    scrollbar-color: var(--accent) transparent;
+  .terminal-shell canvas {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
   }
 }
