@@ -316,7 +316,6 @@
         appOptions: {
           renderer: "auto",
           fontSize: 13,
-          fontPreset: "none",
           fontHinting: false,
           maxScrollbackBytes: 10_000_000,
           touchSelectionMode: "long-press",
