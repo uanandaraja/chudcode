@@ -313,9 +313,32 @@
       restty = new Restty({
         root: terminalElement,
         createInitialPane: true,
+        fontSources: [
+          {
+            type: "local",
+            matchers: [
+              "jetbrains mono nerd font",
+              "jetbrains mono",
+              "fira code nerd font",
+              "fira code",
+              "sf mono",
+              "menlo",
+              "ibm plex mono",
+              "monaco",
+              "liberation mono",
+            ],
+            label: "Local mono",
+          },
+          {
+            type: "url",
+            url: "https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@v2.304/fonts/ttf/JetBrainsMono-Regular.ttf",
+            label: "JetBrains Mono",
+          },
+        ],
         appOptions: {
           renderer: "auto",
-          fontSize: 13,
+          fontSize: 16,
+          fontPreset: "none",
           fontHinting: false,
           maxScrollbackBytes: 10_000_000,
           touchSelectionMode: "long-press",
@@ -334,7 +357,7 @@ selection-background = ${cssVar("--terminal-selection", "rgba(103, 200, 255, 0.2
 `);
 
       restty.applyTheme(theme, "werkbench");
-      restty.setFontSize(13);
+      restty.setFontSize(16);
       resttyReady = true;
       fitTerminal();
 
