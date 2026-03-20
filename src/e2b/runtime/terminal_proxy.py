@@ -34,6 +34,17 @@ LEGACY_BASH_COMMANDS = {
     "/bin/bash --login",
 }
 
+DIRECT_SHELL_COMMANDS = {
+    "fish": ["/usr/bin/fish"],
+    "fish -l": ["/usr/bin/fish", "-l"],
+    "/usr/bin/fish": ["/usr/bin/fish"],
+    "/usr/bin/fish -l": ["/usr/bin/fish", "-l"],
+    "bash": ["/bin/bash"],
+    "bash -l": ["/bin/bash", "-l"],
+    "/bin/bash": ["/bin/bash"],
+    "/bin/bash -l": ["/bin/bash", "-l"],
+}
+
 
 def set_winsize(fd: int, rows: int, cols: int) -> None:
     ioctl(fd, termios.TIOCSWINSZ, pack("HHHH", rows, cols, 0, 0))
@@ -65,6 +76,13 @@ def normalize_command(command: str) -> str:
     return normalized
 
 
+def resolve_process_command(command: str) -> list[str]:
+    if command in DIRECT_SHELL_COMMANDS:
+        return DIRECT_SHELL_COMMANDS[command]
+
+    return ["bash", "-lc", f"exec {command}"]
+
+
 def read_terminal_config() -> tuple[str, str]:
     if SESSION_CONFIG_PATH.exists():
         try:
@@ -84,7 +102,7 @@ async def handle_terminal(websocket):
     workdir, command = read_terminal_config()
 
     process = subprocess.Popen(
-        ["bash", "-lc", f"cd {shlex.quote(workdir)} && exec {command}"],
+        resolve_process_command(command),
         stdin=slave_fd,
         stdout=slave_fd,
         stderr=slave_fd,
