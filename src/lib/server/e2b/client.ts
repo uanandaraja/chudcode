@@ -158,7 +158,7 @@ async function provisionWorkspaceSandbox(
   const repoUrl = `https://github.com/${workspace.owner}/${workspace.repo}.git`;
   const terminalConfig = JSON.stringify({
     cwd,
-    command: "bash -l",
+    command: "fish -l",
   });
   const sandbox = await Sandbox.connect(sandboxId, {
     apiKey: env.E2B_API_KEY,

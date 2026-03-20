@@ -5,6 +5,7 @@ const aptPackages = [
   "ca-certificates",
   "curl",
   "wget",
+  "fish",
   "git",
   "sudo",
   "openssh-server",
@@ -17,6 +18,7 @@ const aptPackages = [
   "nano",
   "ripgrep",
   "tmux",
+  "fzf",
   "htop",
   "procps",
   "iproute2",
@@ -76,6 +78,14 @@ export const template = Template()
   .copy("runtime/desktop_proxy.py", "/usr/local/bin/desktop_proxy.py", {
     user: "root",
     mode: 0o755,
+  })
+  .copy("runtime/config/fish/config.fish", "/usr/local/share/werkbench/fish/config.fish", {
+    user: "root",
+    mode: 0o644,
+  })
+  .copy("runtime/config/starship.toml", "/usr/local/share/werkbench/starship.toml", {
+    user: "root",
+    mode: 0o644,
   })
   .copy(
     "runtime/start-ssh-stack.sh",
@@ -138,7 +148,9 @@ export const template = Template()
   )
   .runCmd("python3 -m pip install --break-system-packages aiohttp websockets uv")
   .runCmd("mkdir -p /etc/sudoers.d && printf 'user ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/e2b-user && chmod 440 /etc/sudoers.d/e2b-user")
+  .runCmd("curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /usr/local/bin")
   .runCmd("mkdir -p /home/user/workspace && chown -R user:user /home/user")
+  .runCmd("usermod -s /usr/bin/fish user")
   .setUser("user")
   .setWorkdir("/home/user/workspace")
   .runCmd("curl -fsSL https://bun.sh/install | bash")
@@ -154,6 +166,14 @@ export const template = Template()
     ].join("\n"),
   )
   .runCmd("curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path")
+  .runCmd(
+    [
+      "mkdir -p $HOME/.config/fish",
+      "ln -sf /usr/local/share/werkbench/fish/config.fish $HOME/.config/fish/config.fish",
+      "ln -sf /usr/local/share/werkbench/starship.toml $HOME/.config/starship.toml",
+      "rm -f $HOME/.tmux.conf",
+    ].join(" && "),
+  )
   .runCmd(`printf '%s\n' '${userEnv.replaceAll("'", "'\\''")}' >> $HOME/.bashrc`)
   .runCmd("printf '\n[ -f ~/.bashrc ] && . ~/.bashrc\n' >> $HOME/.profile")
   .runCmd(
@@ -165,6 +185,8 @@ export const template = Template()
       "python3 --version",
       "uv --version",
       "git --version",
+      "fish --version",
+      "starship --version",
       "nvim --version | head -n 1",
       "tmux -V",
       "rg --version | head -n 1",

@@ -17,13 +17,22 @@ import websockets
 
 PORT = int(os.environ.get("E2B_TERMINAL_PORT", "7681"))
 DEFAULT_WORKDIR = os.environ.get("WERKBENCH_CWD", "/home/user/workspace")
-DEFAULT_COMMAND = os.environ.get("WERKBENCH_TERMINAL_COMMAND", "bash -l")
+DEFAULT_COMMAND = os.environ.get("WERKBENCH_TERMINAL_COMMAND", "fish -l")
 SESSION_CONFIG_PATH = Path(
     os.environ.get(
         "WERKBENCH_TERMINAL_CONFIG_PATH",
         "/home/user/.cache/werkbench/terminal-session.json",
     )
 )
+
+LEGACY_BASH_COMMANDS = {
+    "bash",
+    "bash -l",
+    "bash --login",
+    "/bin/bash",
+    "/bin/bash -l",
+    "/bin/bash --login",
+}
 
 
 def set_winsize(fd: int, rows: int, cols: int) -> None:
@@ -38,7 +47,7 @@ def shell_env() -> dict[str, str]:
     env["HOME"] = user.pw_dir
     env["USER"] = user.pw_name
     env["LOGNAME"] = user.pw_name
-    env["SHELL"] = env.get("SHELL", "/bin/bash")
+    env["SHELL"] = "/usr/bin/fish"
     env["TERM"] = (
         "xterm-256color"
         if not term or term in {"unknown", "dumb"}
@@ -49,12 +58,19 @@ def shell_env() -> dict[str, str]:
     return env
 
 
+def normalize_command(command: str) -> str:
+    normalized = command.strip()
+    if not normalized or normalized in LEGACY_BASH_COMMANDS:
+        return DEFAULT_COMMAND
+    return normalized
+
+
 def read_terminal_config() -> tuple[str, str]:
     if SESSION_CONFIG_PATH.exists():
         try:
             payload = json.loads(SESSION_CONFIG_PATH.read_text())
             cwd = payload.get("cwd") or DEFAULT_WORKDIR
-            command = payload.get("command") or DEFAULT_COMMAND
+            command = normalize_command(payload.get("command") or DEFAULT_COMMAND)
             return cwd, command
         except (json.JSONDecodeError, OSError):
             pass
@@ -103,6 +119,10 @@ async def handle_terminal(websocket):
                     int(payload.get("rows", 24)),
                     int(payload.get("cols", 80)),
                 )
+                try:
+                    os.killpg(process.pid, signal.SIGWINCH)
+                except ProcessLookupError:
+                    pass
 
     try:
         await asyncio.gather(pty_to_socket(), socket_to_pty())
