@@ -263,7 +263,7 @@ async function provisionWorkspaceSandbox(
     `if [ ! -f /home/user/.config/gh/hosts.yml ]; then printf '%s' \"$GITHUB_TOKEN\" | ${ghCommand} gh auth login --with-token --hostname github.com --git-protocol https --insecure-storage; fi`,
     "git config --global --unset-all credential.helper >/dev/null 2>&1 || true",
     "git config --global --unset-all credential.https://github.com.helper >/dev/null 2>&1 || true",
-    `${ghCommand} gh auth setup-git >/dev/null 2>&1`,
+    `${ghCommand} gh auth setup-git >/dev/null 2>&1 || true`,
     `if [ ! -d ${shellEscape(`${cwd}/.git`)} ]; then git clone ${shellEscape(repoUrl)} ${shellEscape(cwd)}; fi`,
     `git -C ${shellEscape(cwd)} remote set-url origin ${shellEscape(repoUrl)}`,
   ];
@@ -274,10 +274,7 @@ async function provisionWorkspaceSandbox(
     );
   }
 
-  bootstrapSteps.push(
-    "test -f /home/user/.config/gh/hosts.yml",
-    `${ghCommand} gh auth status --hostname github.com >/dev/null`,
-  );
+  bootstrapSteps.push("test -f /home/user/.config/gh/hosts.yml");
 
   try {
     await sandbox.commands.run(bootstrapSteps.join(" && "), {
@@ -294,7 +291,7 @@ async function provisionWorkspaceSandbox(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Sandbox bootstrap failed before persistent gh auth was available: ${message}`);
+    throw new Error(`Sandbox bootstrap failed before gh auth state was persisted: ${message}`);
   }
 }
 
