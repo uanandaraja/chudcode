@@ -272,6 +272,7 @@ async function bootstrapWorkspace(
   const bootstrapCommands = [
     "mkdir -p /workspace/.config/gh",
     "mkdir -p /workspace/.config/fish",
+    "ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc",
     "ln -sf /usr/local/share/chudcode/fish/config.fish /workspace/.config/fish/config.fish",
     "ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml",
     env.GITHUB_TOKEN

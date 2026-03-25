@@ -1,0 +1,9 @@
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$HOME/.bun/bin:$HOME/.local/bin:$HOME/.npm-global/bin:$HOME/.opencode/bin:$PATH"
+export EDITOR="nvim"
+export VISUAL="nvim"
+export PAGER="less"
+
+if [[ $- == *i* ]] && [ -t 0 ] && command -v fish >/dev/null 2>&1; then
+  exec /usr/bin/fish -i
+fi

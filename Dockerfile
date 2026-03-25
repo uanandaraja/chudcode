@@ -46,6 +46,7 @@ RUN apt-get update \
 RUN curl -fsSL https://bun.sh/install | bash
 
 COPY src/cloudflare/config/fish/config.fish /usr/local/share/chudcode/fish/config.fish
+COPY src/cloudflare/config/bash/bashrc /usr/local/share/chudcode/bash/bashrc
 COPY src/cloudflare/config/starship.toml /usr/local/share/chudcode/starship.toml
 
 RUN mkdir -p /workspace/.config/gh /workspace/.local/bin /workspace/.npm-global \
@@ -61,6 +62,7 @@ RUN timeout 120s bash -lc 'curl -fsSL https://claude.ai/install.sh | bash' || tr
 RUN timeout 120s bash -lc 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path' || true
 
 RUN mkdir -p /workspace/.config/fish \
+  && ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc \
   && ln -sf /usr/local/share/chudcode/fish/config.fish /workspace/.config/fish/config.fish \
   && ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml
 
