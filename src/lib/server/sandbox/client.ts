@@ -108,13 +108,15 @@ function getSandboxEnv(env: PlatformEnv) {
     XDG_CONFIG_HOME: "/workspace/.config",
     LOGNAME: "workspace",
     USER: "workspace",
-    SHELL: "/usr/bin/fish",
+    SHELL: "/bin/bash",
     EDITOR: "nvim",
     VISUAL: "nvim",
     PAGER: "less",
     PATH: [
-      "/root/.bun/bin",
-      "/root/.local/bin",
+      "/workspace/.bun/bin",
+      "/workspace/.local/bin",
+      "/workspace/.npm-global/bin",
+      "/workspace/.opencode/bin",
       "/usr/local/bin",
       "/usr/local/sbin",
       "/usr/bin",
@@ -248,7 +250,7 @@ async function restoreWorkspaceBackup(
 }
 
 async function bootstrapWorkspace(
-  env: WorkspaceLaunchEnv,
+  env: PlatformEnv,
   sandboxId: string,
   workspace: Workspace,
   row: SandboxRow | null,
@@ -347,13 +349,14 @@ export async function createSandbox(env: WorkspaceLaunchEnv, workspace: Workspac
   const existing = await getSandboxRowByWorkspaceId(env, workspace.id);
 
   await bootstrapWorkspace(env, sandboxId, workspace, existing);
+  const latest = await getSandboxRowByWorkspaceId(env, workspace.id);
 
   await upsertSandboxRow(env, {
     workspaceId: workspace.id,
     sandboxId,
     active: true,
-    backupId: existing?.backupId ?? null,
-    backupDir: existing?.backupDir ?? getWorkspaceDir(workspace),
+    backupId: latest?.backupId ?? null,
+    backupDir: latest?.backupDir ?? getWorkspaceDir(workspace),
     startedAt: existing?.active ? existing.startedAt ?? now : now,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
@@ -401,20 +404,26 @@ export async function getOrCreateSandboxSession(
   sandboxId: string,
   sessionId: string,
 ): Promise<ExecutionSession> {
-  const { workspace } = await getSessionWorkspace(env, sandboxId);
+  const { row, workspace } = await getSessionWorkspace(env, sandboxId);
   const sandbox = await getSandboxHandle(env, sandboxId);
   const envVars = getSandboxEnv(env);
 
+  await bootstrapWorkspace(env, sandboxId, workspace, row);
+
   try {
-    return await sandbox.getSession(sessionId);
-  } catch {
-    return sandbox.createSession({
+    return await sandbox.createSession({
       id: sessionId,
       name: sessionId,
       cwd: getWorkspaceDir(workspace),
       env: envVars,
       commandTimeoutMs: 1000 * 60 * 60,
     });
+  } catch (error) {
+    if (!(error instanceof Error) || !error.message.toLowerCase().includes("already")) {
+      throw error;
+    }
+
+    return sandbox.getSession(sessionId);
   }
 }
 
