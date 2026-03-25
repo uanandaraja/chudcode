@@ -255,14 +255,15 @@ async function provisionWorkspaceSandbox(
     domain: env.E2B_DOMAIN,
     timeoutMs: getDefaultTimeoutMs(env),
   });
+  const ghCommand = "env -u GH_TOKEN -u GITHUB_TOKEN";
   const bootstrapSteps = [
     "mkdir -p /home/user/.cache/chudcode /home/user/workspace",
     `printf '%s' ${shellEscape(terminalConfig)} > /home/user/.cache/chudcode/terminal-session.json`,
     "mkdir -p /home/user/.config/gh",
-    `if [ ! -f /home/user/.config/gh/hosts.yml ]; then printf '%s' \"$GITHUB_TOKEN\" | env -u GH_TOKEN -u GITHUB_TOKEN gh auth login --with-token --hostname github.com --git-protocol https --insecure-storage; fi`,
+    `if [ ! -f /home/user/.config/gh/hosts.yml ]; then printf '%s' \"$GITHUB_TOKEN\" | ${ghCommand} gh auth login --with-token --hostname github.com --git-protocol https --insecure-storage; fi`,
     "git config --global --unset-all credential.helper >/dev/null 2>&1 || true",
     "git config --global --unset-all credential.https://github.com.helper >/dev/null 2>&1 || true",
-    "env -u GH_TOKEN -u GITHUB_TOKEN gh auth setup-git >/dev/null 2>&1 || true",
+    `${ghCommand} gh auth setup-git >/dev/null 2>&1`,
     `if [ ! -d ${shellEscape(`${cwd}/.git`)} ]; then git clone ${shellEscape(repoUrl)} ${shellEscape(cwd)}; fi`,
     `git -C ${shellEscape(cwd)} remote set-url origin ${shellEscape(repoUrl)}`,
   ];
@@ -273,14 +274,28 @@ async function provisionWorkspaceSandbox(
     );
   }
 
-  await sandbox.commands.run(bootstrapSteps.join(" && "), {
-    user: "user",
-    envs: {
-      GH_TOKEN: env.GITHUB_TOKEN,
-      GITHUB_TOKEN: env.GITHUB_TOKEN,
-    },
-    timeoutMs: 120000,
-  });
+  bootstrapSteps.push(
+    "test -f /home/user/.config/gh/hosts.yml",
+    `${ghCommand} gh auth status --hostname github.com >/dev/null`,
+  );
+
+  try {
+    await sandbox.commands.run(bootstrapSteps.join(" && "), {
+      user: "user",
+      envs: {
+        GH_TOKEN: env.GITHUB_TOKEN,
+        GITHUB_TOKEN: env.GITHUB_TOKEN,
+        HOME: "/home/user",
+        USER: "user",
+        LOGNAME: "user",
+        XDG_CONFIG_HOME: "/home/user/.config",
+      },
+      timeoutMs: 120000,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Sandbox bootstrap failed before persistent gh auth was available: ${message}`);
+  }
 }
 
 export async function createSandbox(env: WorkspaceLaunchEnv, workspace: Workspace) {
