@@ -142,7 +142,7 @@ export const template = Template()
   .setWorkdir("/home/user/workspace")
   .runCmd("curl -fsSL https://bun.sh/install | bash")
   .runCmd("mkdir -p $HOME/.npm-global && npm config set prefix $HOME/.npm-global")
-  .runCmd("npm install -g @openai/codex@0.115.0 @mariozechner/pi-coding-agent@0.57.1")
+  .runCmd("npm install -g wrangler@4.75.0 @openai/codex@0.115.0 @mariozechner/pi-coding-agent@0.57.1")
   .runCmd(
     [
       "if curl -fsSL https://claude.ai/install.sh | bash; then",
@@ -177,6 +177,7 @@ export const template = Template()
       "nvim --version | head -n 1",
       "tmux -V",
       "rg --version | head -n 1",
+      "$HOME/.npm-global/bin/wrangler --version",
       "$HOME/.npm-global/bin/codex --version",
       "if [ -x \"$HOME/.local/bin/claude\" ]; then $HOME/.local/bin/claude --version; else echo 'claude-not-installed'; fi",
       "$HOME/.opencode/bin/opencode --version",
