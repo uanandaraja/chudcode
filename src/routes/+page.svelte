@@ -65,9 +65,7 @@
             onclick={() => setActiveSandbox(sandbox.sandboxID)}
           >
             <div
-              class="size-1.5 rounded-full {sandbox.state === 'running'
-                ? 'bg-status-running'
-                : 'bg-status-paused'}"
+              class="size-1.5 rounded-full bg-status-running"
             ></div>
             <span class="font-mono">
               {sandbox.metadata?.repoName ?? sandbox.sandboxID.slice(0, 8)}

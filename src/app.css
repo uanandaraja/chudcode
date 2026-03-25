@@ -58,7 +58,6 @@
   --surface-hover: oklch(1 0 0 / 7%);
   --surface-selected: oklch(1 0 0 / 8%);
   --status-running: oklch(0.74 0.17 145);
-  --status-paused: oklch(0.77 0.15 75);
   --avatar-1: oklch(0.62 0.18 250);
   --avatar-2: oklch(0.62 0.18 150);
   --avatar-3: oklch(0.62 0.18 35);
@@ -116,7 +115,6 @@
   --color-surface-hover: var(--surface-hover);
   --color-surface-selected: var(--surface-selected);
   --color-status-running: var(--status-running);
-  --color-status-paused: var(--status-paused);
   --color-terminal-background: var(--terminal-background);
   --color-terminal-foreground: var(--terminal-foreground);
   --radius-sm: 0;

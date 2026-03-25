@@ -6,9 +6,7 @@ import {
   getSandboxDetail,
   killSandbox,
   listSandboxes,
-  pauseSandbox,
-  resumeSandbox,
-} from "$lib/server/e2b/client";
+} from "$lib/server/sandbox/client";
 import {
   createWorkspace,
   deleteWorkspace,
@@ -78,23 +76,6 @@ export const deleteWorkspaceCommand = command(
   async ({ workspaceId }: { workspaceId: string }) => {
     const env = getPlatformEnv();
     return deleteWorkspace(env, workspaceId);
-  },
-);
-
-export const resumeSandboxCommand = command(
-  "unchecked",
-  async ({ sandboxId, timeoutMs }: { sandboxId: string; timeoutMs?: number }) => {
-    const env = getPlatformEnv();
-    return resumeSandbox(env, sandboxId, timeoutMs);
-  },
-);
-
-export const pauseSandboxCommand = command(
-  "unchecked",
-  async ({ sandboxId }: { sandboxId: string }) => {
-    const env = getPlatformEnv();
-    await pauseSandbox(env, sandboxId);
-    return { sandboxId };
   },
 );
 

@@ -99,7 +99,7 @@
     <!-- Description -->
     {#if !error}
       <p class="mb-5 text-[13px] text-foreground/45 leading-5">
-        Clones the repo into a new E2B sandbox and opens a terminal. TTL is 60 minutes.
+        Launches a Cloudflare Sandbox for this repo and opens a terminal. It stays alive until you kill it.
       </p>
     {/if}
 

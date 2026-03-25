@@ -1,6 +1,10 @@
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getSandboxDetail, getSandboxTerminalUrl } from "$lib/server/e2b/client";
+import {
+  getOrCreateSandboxSession,
+  getSandboxDetail,
+} from "$lib/server/sandbox/client";
+import type { WorkspaceLaunchEnv } from "$lib/server/env";
 
 export const GET: RequestHandler = async ({ params, platform, request, url }) => {
   if (!platform) {
@@ -12,19 +16,12 @@ export const GET: RequestHandler = async ({ params, platform, request, url }) =>
   }
 
   const sandbox = await getSandboxDetail(platform.env, params.sandboxId);
-
-  if (sandbox.state !== "running") {
-    return new Response("Sandbox is not running", { status: 409 });
-  }
-
   const sessionId = url.searchParams.get("session") ?? crypto.randomUUID();
-  const target = getSandboxTerminalUrl(platform.env, sandbox);
-  const namespace = platform.env.TERMINAL_SESSIONS;
-  const stub = namespace.get(
-    namespace.idFromName(`${params.sandboxId}:${sessionId}`),
+  const session = await getOrCreateSandboxSession(
+    platform.env as WorkspaceLaunchEnv,
+    sandbox.sandboxID,
+    sessionId,
   );
-  const proxyUrl = new URL(request.url);
-  proxyUrl.searchParams.set("target", target);
 
-  return stub.fetch(proxyUrl.toString(), request);
+  return session.terminal(request);
 };

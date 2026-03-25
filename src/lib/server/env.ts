@@ -1,15 +1,16 @@
 import { getRequestEvent } from "$app/server";
 
-export type PlatformEnv = App.Platform["env"] & {
-  DB: D1Database;
-  E2B_API_KEY: string;
-  E2B_BROWSER_DEBUG_PORT?: string;
-  E2B_BROWSER_PROXY_PORT?: string;
-  E2B_DOMAIN?: string;
-  E2B_PREVIEW_PORTS?: string;
-  E2B_SANDBOX_TIMEOUT_MS?: string;
-  E2B_TEMPLATE: string;
-  E2B_TERMINAL_PORT?: string;
+export type PlatformEnv = Env & {
+  BACKUP_BUCKET: R2Bucket;
+  BACKUP_BUCKET_NAME?: string;
+  CHUDCODE_HOSTNAME?: string;
+  GITHUB_TOKEN?: string;
+  R2_ACCESS_KEY_ID?: string;
+  R2_SECRET_ACCESS_KEY?: string;
+  SANDBOX_BACKUP_TTL_SECONDS?: string;
+  SANDBOX_PREVIEW_PORTS?: string;
+  SANDBOX_SLEEP_AFTER?: string;
+  Sandbox: App.Platform["env"]["Sandbox"];
 };
 
 export type WorkspaceLaunchEnv = PlatformEnv & {

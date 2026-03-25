@@ -5,10 +5,8 @@
   import {
     deleteWorkspaceCommand,
     killSandboxCommand,
-    pauseSandboxCommand,
-    resumeSandboxCommand,
   } from "$lib/remote/chudcode.remote";
-  import { CaretDown, CaretRight, Pause, Play, Plus, Terminal, Trash } from "phosphor-svelte";
+  import { CaretDown, CaretRight, Plus, Terminal, Trash } from "phosphor-svelte";
 
   let {
     workspaces,
@@ -82,25 +80,6 @@
     onClose?.();
   }
 
-  async function handleResumeSandbox(event: MouseEvent, sandboxId: string) {
-    event.stopPropagation();
-
-    sandboxActionPendingId = sandboxId;
-    actionError = "";
-
-    try {
-      await resumeSandboxCommand({ sandboxId });
-      await invalidateAll();
-      await selectSandbox(sandboxId);
-    } catch (err) {
-      actionError = err instanceof Error ? err.message : "Failed to resume sandbox";
-    } finally {
-      if (sandboxActionPendingId === sandboxId) {
-        sandboxActionPendingId = null;
-      }
-    }
-  }
-
   async function removeSandboxFromRoute(sandboxId: string) {
     const params = new URLSearchParams(page.url.searchParams);
     const remainingIds = params.getAll("sandbox").filter((id) => id !== sandboxId);
@@ -120,24 +99,6 @@
 
     const query = params.toString();
     await goto(query ? `/?${query}` : "/", { replaceState: false });
-  }
-
-  async function handlePauseSandbox(event: MouseEvent, sandboxId: string) {
-    event.stopPropagation();
-
-    sandboxActionPendingId = sandboxId;
-    actionError = "";
-
-    try {
-      await pauseSandboxCommand({ sandboxId });
-      await invalidateAll();
-    } catch (err) {
-      actionError = err instanceof Error ? err.message : "Failed to pause sandbox";
-    } finally {
-      if (sandboxActionPendingId === sandboxId) {
-        sandboxActionPendingId = null;
-      }
-    }
   }
 
   async function handleKillSandbox(event: MouseEvent, sandboxId: string) {
@@ -290,9 +251,7 @@
                     : 'text-foreground/45 hover:text-foreground/70'}"
                 >
                   <div
-                    class="size-1.5 flex-shrink-0 rounded-full {sandbox.state === 'running'
-                      ? 'bg-status-running'
-                      : 'bg-status-paused'}"
+                    class="size-1.5 flex-shrink-0 rounded-full bg-status-running"
                   ></div>
                   <span class="flex-1 truncate font-mono text-[11px]">
                     {sandbox.metadata?.repoOwner ?? "?"}/{sandbox.metadata?.repoName ??
@@ -301,30 +260,6 @@
                 </button>
 
                 <div class="mr-1 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                  {#if sandbox.state === "paused"}
-                    <button
-                      type="button"
-                      class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-foreground/35 transition-colors hover:bg-field hover:text-foreground/65 disabled:cursor-not-allowed disabled:opacity-50"
-                      onclick={(event) => handleResumeSandbox(event, sandbox.sandboxID)}
-                      disabled={sandboxActionPendingId !== null}
-                      title="Resume sandbox"
-                      aria-label={`Resume ${sandbox.sandboxID}`}
-                    >
-                      <Play class="size-3" weight="fill" />
-                    </button>
-                  {:else}
-                    <button
-                      type="button"
-                      class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-foreground/35 transition-colors hover:bg-field hover:text-foreground/65 disabled:cursor-not-allowed disabled:opacity-50"
-                      onclick={(event) => handlePauseSandbox(event, sandbox.sandboxID)}
-                      disabled={sandboxActionPendingId !== null}
-                      title="Pause sandbox"
-                      aria-label={`Pause ${sandbox.sandboxID}`}
-                    >
-                      <Pause class="size-3" />
-                    </button>
-                  {/if}
-
                   <button
                     type="button"
                     class="flex size-6 flex-shrink-0 items-center justify-center rounded-md text-destructive/55 transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-50"

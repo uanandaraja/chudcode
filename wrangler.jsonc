@@ -11,6 +11,14 @@
 		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
+	"containers": [
+		{
+			"name": "chudcode-sandbox",
+			"class_name": "Sandbox",
+			"image": "./Dockerfile",
+			"instance_type": "standard-4"
+		}
+	],
 	"workers_dev": true,
 	"preview_urls": true,
 	"observability": {
@@ -32,25 +40,38 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"name": "TERMINAL_SESSIONS",
-				"class_name": "TerminalSession"
+				"name": "Sandbox",
+				"class_name": "Sandbox"
 			}
 		]
 	},
+	"r2_buckets": [
+		{
+			"binding": "BACKUP_BUCKET",
+			"bucket_name": "chudcode-sandboxes",
+			"preview_bucket_name": "chudcode-sandboxes",
+			"remote": true
+		}
+	],
 	"migrations": [
 		{
 			"tag": "v1",
 			"new_sqlite_classes": [
 				"TerminalSession"
 			]
+		},
+		{
+			"tag": "v2",
+			"new_sqlite_classes": [
+				"Sandbox"
+			]
 		}
 	],
 	"vars": {
-		"E2B_DOMAIN": "e2b.app",
-		"E2B_BROWSER_DEBUG_PORT": "9222",
-		"E2B_PREVIEW_PORTS": "3000,3001,4173,5173,8000,8080,8787,4321",
-		"E2B_TEMPLATE": "chudcode-dev",
-		"E2B_TERMINAL_PORT": "7681",
-		"E2B_SANDBOX_TIMEOUT_MS": "3600000"
+		"BACKUP_BUCKET_NAME": "chudcode-sandboxes",
+		"CHUDCODE_HOSTNAME": "chudcode.xyz",
+		"SANDBOX_PREVIEW_PORTS": "3000,3001,4173,5173,8000,8080,8787,4321",
+		"SANDBOX_SLEEP_AFTER": "10m",
+		"SANDBOX_BACKUP_TTL_SECONDS": "1209600"
 	}
 }

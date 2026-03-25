@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from "./$types";
-import { listSandboxes } from "$lib/server/e2b/client";
+import { listSandboxes } from "$lib/server/sandbox/client";
 import { listWorkspaces } from "$lib/server/workspaces/service";
 
 export const load: LayoutServerLoad = async ({ platform }) => {

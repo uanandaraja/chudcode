@@ -6,7 +6,6 @@
     ListedSandbox,
     PreviewCandidate,
   } from "$lib/chudcode/types";
-  import { resumeSandboxCommand } from "$lib/remote/chudcode.remote";
   import { Button } from "$lib/components/ui/button/index.js";
   import TerminalPane from "$lib/components/TerminalPane.svelte";
   import {
@@ -15,7 +14,6 @@
     ArrowSquareOut,
     Code,
     Globe,
-    Play,
     SquareSplitHorizontal,
     SquareSplitVertical,
     Terminal,
@@ -113,7 +111,7 @@
       return;
     }
 
-    if (payload.status !== "open" || !payload.url || !payload.devtoolsUrl) {
+    if (payload.status !== "open" || !payload.url) {
       browserState = "error";
       browserError =
         payload.status === "error"
@@ -128,7 +126,7 @@
     browserError = "";
     browserMessage = "";
     browserUrl = payload.url;
-    browserDevtoolsUrl = payload.devtoolsUrl;
+    browserDevtoolsUrl = payload.devtoolsUrl ?? "";
     browserSelectedPort = payload.selectedPort ?? null;
     if (payload.selectedPort) {
       browserPortInput = String(payload.selectedPort);
@@ -185,24 +183,6 @@
     browserDevtoolsVisible = !browserDevtoolsVisible;
     if (browserDevtoolsVisible) {
       browserDevtoolsKey += 1;
-    }
-  }
-
-  async function handleResume() {
-    actionPending = true;
-    actionError = "";
-    try {
-      await resumeSandboxCommand({ sandboxId: sandbox.sandboxID });
-      await invalidateAll();
-      await tick();
-      if (panelMode === "browser") {
-        await loadBrowser(browserSelectedPort ?? undefined);
-        await syncActiveBrowser();
-      }
-    } catch (err) {
-      actionError = err instanceof Error ? err.message : "Failed to resume";
-    } finally {
-      actionPending = false;
     }
   }
 
@@ -408,18 +388,7 @@
     </div>
   {/if}
 
-  {#if sandbox.state === "paused"}
-    <div class="flex flex-1 items-center justify-center">
-      <div class="text-center">
-        <p class="text-sm text-foreground/50">Sandbox is paused</p>
-        <Button size="sm" class="mt-4" onclick={handleResume} disabled={actionPending}>
-          <Play class="size-3.5" />
-          {actionPending ? "Resuming..." : "Resume sandbox"}
-        </Button>
-      </div>
-    </div>
-  {:else}
-    <div class:hidden={panelMode !== "terminal"} class="flex flex-1 overflow-hidden">
+  <div class:hidden={panelMode !== "terminal"} class="flex flex-1 overflow-hidden">
       <div
         class="terminal-split-grid h-full w-full"
         bind:this={splitContainer}
@@ -470,7 +439,7 @@
       </div>
     </div>
 
-    <div class:hidden={panelMode !== "browser"} class="flex flex-1 flex-col overflow-hidden">
+  <div class:hidden={panelMode !== "browser"} class="flex flex-1 flex-col overflow-hidden">
       <div class="flex flex-wrap items-center gap-2 border-b border-border/50 px-3 py-2">
         <Button
           size="xs"
@@ -609,6 +578,5 @@
           </div>
         </div>
       {/if}
-    </div>
-  {/if}
+  </div>
 </div>

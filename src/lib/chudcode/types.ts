@@ -1,4 +1,4 @@
-export type SandboxState = "running" | "paused";
+export type SandboxState = "running";
 
 export type Workspace = {
   id: string;
@@ -19,33 +19,19 @@ export type WorkspaceInput = {
 };
 
 export type ListedSandbox = {
-  alias?: string;
-  cpuCount: number;
-  diskSizeMB: number;
-  endAt: string;
-  envdVersion: string;
-  memoryMB: number;
-  metadata?: Record<string, string>;
+  metadata?: {
+    workspaceId: string;
+    workspaceName: string;
+    repoOwner: string;
+    repoName: string;
+    repoFullName: string;
+  };
   sandboxID: string;
   startedAt: string;
   state: SandboxState;
-  templateID: string;
 };
 
-export type SandboxDetail = {
-  alias?: string;
-  cpuCount: number;
-  diskSizeMB: number;
-  domain?: string | null;
-  endAt: string;
-  envdVersion: string;
-  memoryMB: number;
-  metadata?: Record<string, string>;
-  sandboxID: string;
-  startedAt: string;
-  state: SandboxState;
-  templateID: string;
-};
+export type SandboxDetail = ListedSandbox;
 
 export type PreviewCandidate = {
   port: number;
