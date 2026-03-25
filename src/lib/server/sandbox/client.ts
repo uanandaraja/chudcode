@@ -249,6 +249,39 @@ async function restoreWorkspaceBackup(
   }
 }
 
+async function ensureWorkspaceRuntime(
+  env: PlatformEnv,
+  sandbox: Awaited<ReturnType<typeof getSandboxHandle>>,
+) {
+  const envVars = getSandboxEnv(env);
+
+  await sandbox.setEnvVars(envVars);
+  await sandbox.mkdir("/workspace", { recursive: true });
+  await sandbox.mkdir("/workspace/.config/gh", { recursive: true });
+  await sandbox.exec(
+    [
+      "mkdir -p /workspace/.config/gh",
+      "ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc",
+      "ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml",
+    ].join(" && "),
+    {
+      cwd: "/workspace",
+      env: envVars,
+    },
+  );
+}
+
+async function sandboxHasWorkspaceRepo(
+  sandbox: Awaited<ReturnType<typeof getSandboxHandle>>,
+  workspace: Workspace,
+) {
+  try {
+    return await sandbox.exists(`${getWorkspaceDir(workspace)}/.git`);
+  } catch {
+    return false;
+  }
+}
+
 async function bootstrapWorkspace(
   env: PlatformEnv,
   sandboxId: string,
@@ -258,10 +291,9 @@ async function bootstrapWorkspace(
   const sandbox = await getSandboxHandle(env, sandboxId);
   const cwd = getWorkspaceDir(workspace);
   const repoUrl = getRepoUrl(workspace);
+  const envVars = getSandboxEnv(env);
 
-  await sandbox.setEnvVars(getSandboxEnv(env));
-  await sandbox.mkdir("/workspace", { recursive: true });
-  await sandbox.mkdir("/workspace/.config/gh", { recursive: true });
+  await ensureWorkspaceRuntime(env, sandbox);
 
   await restoreWorkspaceBackup(env, sandboxId, workspace, row);
 
@@ -270,9 +302,6 @@ async function bootstrapWorkspace(
     : `git clone ${shellEscape(repoUrl)} ${shellEscape(cwd)}`;
 
   const bootstrapCommands = [
-    "mkdir -p /workspace/.config/gh",
-    "ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc",
-    "ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml",
     env.GITHUB_TOKEN
       ? [
           "printf '%s' \"$GITHUB_TOKEN\" | HOME=/workspace XDG_CONFIG_HOME=/workspace/.config gh auth login --hostname github.com --with-token >/dev/null 2>&1 || true",
@@ -288,7 +317,7 @@ async function bootstrapWorkspace(
 
   await sandbox.exec(bootstrapCommands.join(" && "), {
     cwd: "/workspace",
-    env: getSandboxEnv(env),
+    env: envVars,
   });
 }
 
@@ -410,7 +439,10 @@ export async function getOrCreateSandboxSession(
   const sandbox = await getSandboxHandle(env, sandboxId);
   const envVars = getSandboxEnv(env);
 
-  await bootstrapWorkspace(env, sandboxId, workspace, row);
+  await ensureWorkspaceRuntime(env, sandbox);
+  if (!(await sandboxHasWorkspaceRepo(sandbox, workspace))) {
+    await bootstrapWorkspace(env, sandboxId, workspace, row);
+  }
 
   try {
     return await sandbox.createSession({

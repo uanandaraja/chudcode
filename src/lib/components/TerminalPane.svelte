@@ -317,7 +317,6 @@
             type: "resize",
             cols,
             rows,
-            ...meta,
           }),
         );
         return true;
@@ -337,8 +336,10 @@
     cleanupTerminalConnection();
     terminalState = "connecting";
     terminalError = "";
-    await ensureMeasuredTerminalSize();
     restty.connectPty(getTerminalUrl());
+    void ensureMeasuredTerminalSize().then(() => {
+      syncPtySize();
+    });
   }
 
   onMount(() => {
@@ -357,9 +358,14 @@
         createInitialPane: true,
         fontSources: [
           {
+            type: "local",
+            matchers: ["TX-02-XlabMono", "TX02Mono", "TX-02 Mono"],
+            label: "TX-02-XlabMono",
+          },
+          {
             type: "url",
-            url: "https://raw.githubusercontent.com/ryanoasis/nerd-fonts/refs/heads/master/patched-fonts/JetBrainsMono/Ligatures/Regular/JetBrainsMonoNerdFontMono-Regular.ttf",
-            label: "JetBrains Mono Nerd Font Mono",
+            url: "/fonts/TX02Mono-Regular.ttf",
+            label: "TX-02-XlabMono",
           },
         ],
         appOptions: {
