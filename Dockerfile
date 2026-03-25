@@ -5,7 +5,7 @@ ENV HOME=/workspace
 ENV XDG_CONFIG_HOME=/workspace/.config
 ENV BUN_INSTALL=/workspace/.bun
 ENV NPM_CONFIG_PREFIX=/workspace/.npm-global
-ENV SHELL=/usr/bin/fish
+ENV SHELL=/bin/bash
 ENV PATH=/workspace/.bun/bin:/workspace/.local/bin:/workspace/.npm-global/bin:/workspace/.opencode/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
 
 RUN apt-get update \
@@ -17,7 +17,6 @@ RUN apt-get update \
     build-essential \
     dnsutils \
     file \
-    fish \
     fzf \
     gh \
     git \
@@ -45,7 +44,6 @@ RUN apt-get update \
 
 RUN curl -fsSL https://bun.sh/install | bash
 
-COPY src/cloudflare/config/fish/config.fish /usr/local/share/chudcode/fish/config.fish
 COPY src/cloudflare/config/bash/bashrc /usr/local/share/chudcode/bash/bashrc
 COPY src/cloudflare/config/starship.toml /usr/local/share/chudcode/starship.toml
 
@@ -61,9 +59,7 @@ RUN timeout 120s bash -lc 'curl -fsSL https://claude.ai/install.sh | bash' || tr
 
 RUN timeout 120s bash -lc 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path' || true
 
-RUN mkdir -p /workspace/.config/fish \
-  && ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc \
-  && ln -sf /usr/local/share/chudcode/fish/config.fish /workspace/.config/fish/config.fish \
+RUN ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc \
   && ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml
 
 WORKDIR /workspace

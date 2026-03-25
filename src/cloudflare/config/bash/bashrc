@@ -4,6 +4,14 @@ export EDITOR="nvim"
 export VISUAL="nvim"
 export PAGER="less"
 
-if [[ $- == *i* ]] && [ -t 0 ] && command -v fish >/dev/null 2>&1; then
-  exec /usr/bin/fish -i
+alias ll="ls -lah"
+alias la="ls -A"
+alias gs="git status"
+alias gd="git diff"
+alias gc="git commit"
+alias gp="git pull"
+alias gl="git log --oneline --graph --decorate -20"
+
+if [[ $- == *i* ]] && command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
 fi
