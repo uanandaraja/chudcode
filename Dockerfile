@@ -50,7 +50,7 @@ COPY src/cloudflare/config/starship.toml /usr/local/share/chudcode/starship.toml
 
 RUN mkdir -p /workspace/.config/gh /workspace/.local/bin /workspace/.npm-global \
   && npm config set prefix /workspace/.npm-global \
-  && python3 -m pip install --break-system-packages uv
+  && python3 -m pip install uv
 
 RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /usr/local/bin
 
