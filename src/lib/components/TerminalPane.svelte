@@ -1,7 +1,11 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
+  import type { Terminal as XtermTerminal } from "@xterm/xterm";
+  import type { FitAddon } from "@xterm/addon-fit";
+  import type { SandboxAddon } from "@cloudflare/sandbox/xterm";
   import type { ListedSandbox } from "$lib/chudcode/types";
   import { WarningCircle, X } from "phosphor-svelte";
+  import "@xterm/xterm/css/xterm.css";
 
   let {
     sandbox,
@@ -21,89 +25,17 @@
     onClose?: () => void;
   } = $props();
 
-  type PtyCallbacks = {
-    onConnect?: () => void;
-    onDisconnect?: () => void;
-    onData?: (data: string) => void;
-    onStatus?: (shell: string) => void;
-    onError?: (message: string, errors?: string[]) => void;
-    onExit?: (code: number) => void;
-  };
-
-  type PtyResizeMeta = {
-    widthPx?: number;
-    heightPx?: number;
-    cellW?: number;
-    cellH?: number;
-  };
-
-  type PtyConnectOptions = {
-    url: string;
-    cols?: number;
-    rows?: number;
-    callbacks: PtyCallbacks;
-  };
-
-  type PtyTransport = {
-    connect: (options: PtyConnectOptions) => void | Promise<void>;
-    disconnect: () => void;
-    sendInput: (data: string) => boolean;
-    resize: (cols: number, rows: number, meta?: PtyResizeMeta) => boolean;
-    isConnected: () => boolean;
-    destroy?: () => void | Promise<void>;
-  };
-
-  type ResttyInstance = {
-    connectPty: (url?: string) => void;
-    disconnectPty: () => void;
-    isPtyConnected: () => boolean;
-    focus: () => void;
-    blur: () => void;
-    updateSize: (force?: boolean) => void;
-    destroy: () => void;
-    applyTheme: (theme: unknown, sourceLabel?: string) => void;
-    setFontSize: (value: number) => void;
-  };
-
   let terminalElement = $state<HTMLDivElement | null>(null);
   let terminalState = $state<"idle" | "connecting" | "open" | "closed" | "error">("idle");
   let terminalError = $state("");
 
-  let restty: ResttyInstance | null = null;
-  let ptyTransport: PtyTransport | null = null;
+  let terminal: XtermTerminal | null = null;
+  let fitAddon: FitAddon | null = null;
+  let sandboxAddon: SandboxAddon | null = null;
   let resizeObserver: ResizeObserver | null = null;
-  let resttyReady = false;
+  let terminalReady = false;
   let focusRun = 0;
-  let lastTermSize = $state<{ cols: number; rows: number } | null>(null);
-
-  function nextFrame() {
-    return new Promise<void>((resolve) => {
-      requestAnimationFrame(() => resolve());
-    });
-  }
-
-  function syncPtySize() {
-    if (!ptyTransport?.isConnected() || !lastTermSize) return;
-    if (lastTermSize.cols <= 0 || lastTermSize.rows <= 0) return;
-
-    ptyTransport.resize(lastTermSize.cols, lastTermSize.rows);
-  }
-
-  async function ensureMeasuredTerminalSize() {
-    if (!restty || !visible) return;
-
-    observeTerminal();
-    fitTerminal();
-
-    for (let attempt = 0; attempt < 6; attempt += 1) {
-      await nextFrame();
-      fitTerminal();
-
-      if (lastTermSize && lastTermSize.cols > 0 && lastTermSize.rows > 0) {
-        return;
-      }
-    }
-  }
+  let terminalSessionId = "";
 
   function cssVar(name: string, fallback: string) {
     if (typeof document === "undefined") return fallback;
@@ -119,12 +51,17 @@
 
   function cleanupTerminalConnection() {
     cleanupResizeObserver();
-    ptyTransport?.disconnect();
+    sandboxAddon?.disconnect();
   }
 
   function fitTerminal() {
-    if (!visible || !restty) return;
-    restty.updateSize(true);
+    if (!visible || !fitAddon) return;
+
+    try {
+      fitAddon.fit();
+    } catch {
+      // Ignore transient fit failures while the pane is mounting or hidden.
+    }
   }
 
   function observeTerminal() {
@@ -133,33 +70,28 @@
     if (!visible || !terminalElement) return;
 
     resizeObserver = new ResizeObserver(() => {
-      fitTerminal();
+      requestAnimationFrame(() => {
+        fitTerminal();
+      });
     });
 
     resizeObserver.observe(terminalElement);
   }
 
   async function syncActiveTerminal() {
-    if (!active || !visible || !restty) return;
+    if (!active || !visible || !terminal) return;
 
     const currentRun = ++focusRun;
     await tick();
 
-    if (currentRun !== focusRun || !active || !visible || !restty) return;
+    if (currentRun !== focusRun || !active || !visible || !terminal) return;
 
     requestAnimationFrame(() => {
-      if (currentRun !== focusRun || !active || !visible || !restty) return;
+      if (currentRun !== focusRun || !active || !visible || !terminal) return;
 
       fitTerminal();
       terminalElement?.focus();
-      restty.focus();
-
-      requestAnimationFrame(() => {
-        if (currentRun !== focusRun || !active || !visible || !restty) return;
-
-        restty.focus();
-        fitTerminal();
-      });
+      terminal.focus();
     });
   }
 
@@ -167,178 +99,17 @@
     onActivate?.();
   }
 
-  function getTerminalUrl() {
-    const sessionId = crypto.randomUUID();
-    const protocol = location.protocol === "https:" ? "wss" : "ws";
-    const url = new URL(`${protocol}://${location.host}/api/terminal/${sandbox.sandboxID}`);
-    url.searchParams.set("session", sessionId);
-    return url.toString();
-  }
+  function openTerminal() {
+    if (!sandboxAddon || !terminalReady || sandbox.state !== "running") return;
 
-  function createPtyTransport(): PtyTransport {
-    let socket: WebSocket | null = null;
-    let callbacks: PtyCallbacks = {};
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
-    const suppressedReplies = ["\u001b[?1;2c"];
-
-    const closeSocket = () => {
-      if (!socket) return;
-
-      socket.onopen = null;
-      socket.onclose = null;
-      socket.onerror = null;
-      socket.onmessage = null;
-      socket.close();
-      socket = null;
-    };
-
-    const handleServerMessage = (payload: string) => {
-      try {
-        const parsed = JSON.parse(payload) as
-          | { type?: "status"; shell?: string }
-          | { type?: "error"; message?: string; errors?: string[] }
-          | { type?: "exit"; code?: number };
-
-        if (parsed.type === "status") {
-          callbacks.onStatus?.(parsed.shell ?? "");
-          return true;
-        }
-
-        if (parsed.type === "error") {
-          const message = parsed.message ?? "Terminal connection failed";
-          terminalState = "error";
-          terminalError = message;
-          callbacks.onError?.(message, parsed.errors);
-          return true;
-        }
-
-        if (parsed.type === "exit") {
-          terminalState = "closed";
-          callbacks.onExit?.(parsed.code ?? 0);
-          return true;
-        }
-      } catch {
-        return false;
-      }
-
-      return false;
-    };
-
-    return {
-      connect(options) {
-        callbacks = options.callbacks;
-        closeSocket();
-
-        terminalState = "connecting";
-        terminalError = "";
-
-        socket = new WebSocket(options.url);
-        socket.binaryType = "arraybuffer";
-
-        socket.onopen = () => {
-          terminalState = "open";
-          callbacks.onConnect?.();
-
-          syncPtySize();
-
-          if (options.cols && options.rows) {
-            socket?.send(
-              JSON.stringify({
-                type: "resize",
-                cols: options.cols,
-                rows: options.rows,
-              }),
-            );
-          }
-
-          observeTerminal();
-          if (visible) {
-            void syncActiveTerminal();
-          } else {
-            fitTerminal();
-          }
-        };
-
-        socket.onmessage = async (event) => {
-          if (typeof event.data === "string") {
-            if (!handleServerMessage(event.data)) {
-              callbacks.onData?.(event.data);
-            }
-            return;
-          }
-
-          if (event.data instanceof ArrayBuffer) {
-            callbacks.onData?.(decoder.decode(event.data, { stream: true }));
-            return;
-          }
-
-          const text = await event.data.text();
-          if (!handleServerMessage(text)) {
-            callbacks.onData?.(text);
-          }
-        };
-
-        socket.onerror = () => {
-          terminalState = "error";
-          terminalError = "Terminal connection failed";
-          callbacks.onError?.("Terminal connection failed");
-        };
-
-        socket.onclose = () => {
-          cleanupResizeObserver();
-          if (terminalState !== "error") {
-            terminalState = "closed";
-          }
-          callbacks.onDisconnect?.();
-          socket = null;
-        };
-      },
-      disconnect() {
-        closeSocket();
-      },
-      sendInput(data) {
-        if (!socket || socket.readyState !== WebSocket.OPEN) return false;
-
-        let payload = data;
-        for (const reply of suppressedReplies) {
-          payload = payload.replaceAll(reply, "");
-        }
-
-        if (!payload) return true;
-
-        socket.send(encoder.encode(payload));
-        return true;
-      },
-      resize(cols, rows, meta) {
-        if (!socket || socket.readyState !== WebSocket.OPEN) return false;
-        socket.send(
-          JSON.stringify({
-            type: "resize",
-            cols,
-            rows,
-          }),
-        );
-        return true;
-      },
-      isConnected() {
-        return socket?.readyState === WebSocket.OPEN;
-      },
-      destroy() {
-        closeSocket();
-      },
-    };
-  }
-
-  async function openTerminal() {
-    if (!restty || sandbox.state !== "running") return;
-
-    cleanupTerminalConnection();
     terminalState = "connecting";
     terminalError = "";
-    restty.connectPty(getTerminalUrl());
-    void ensureMeasuredTerminalSize().then(() => {
-      syncPtySize();
+    sandboxAddon.connect({
+      sandboxId: sandbox.sandboxID,
+      sessionId: terminalSessionId,
+    });
+    requestAnimationFrame(() => {
+      fitTerminal();
     });
   }
 
@@ -348,69 +119,88 @@
     let disposed = false;
 
     void (async () => {
-      const { Restty, parseGhosttyTheme } = await import("restty");
+      const [{ Terminal }, { FitAddon }, { SandboxAddon }] = await Promise.all([
+        import("@xterm/xterm"),
+        import("@xterm/addon-fit"),
+        import("@cloudflare/sandbox/xterm"),
+      ]);
 
       if (disposed || !terminalElement) return;
 
-      ptyTransport = createPtyTransport();
-      restty = new Restty({
-        root: terminalElement,
-        createInitialPane: true,
-        fontSources: [
-          {
-            type: "local",
-            matchers: ["TX-02-XlabMono", "TX02Mono", "TX-02 Mono"],
-            label: "TX-02-XlabMono",
-          },
-          {
-            type: "url",
-            url: "/fonts/TX02Mono-Regular.ttf",
-            label: "TX-02-XlabMono",
-          },
-        ],
-        appOptions: {
-          renderer: "auto",
-          fontSize: 16,
-          fontPreset: "none",
-          fontHinting: false,
-          maxScrollbackBytes: 10_000_000,
-          touchSelectionMode: "long-press",
-          ptyTransport,
-          callbacks: {
-            onTermSize: (cols, rows) => {
-              lastTermSize = { cols, rows };
-              syncPtySize();
-            },
-          },
-        },
-        onActivePaneChange: () => {
-          activatePane();
-        },
-      }) as ResttyInstance;
+      terminalSessionId = crypto.randomUUID();
 
-      const theme = parseGhosttyTheme(`
-foreground = ${cssVar("--terminal-foreground", "#edf4ff")}
-background = ${cssVar("--terminal-background", "#0b0f14")}
-cursor-color = ${cssVar("--terminal-cursor", "#9ca3af")}
-selection-background = ${cssVar("--terminal-selection", "rgba(103, 200, 255, 0.22)")}
-`);
+      const nextTerminal = new Terminal({
+        cursorBlink: true,
+        cursorStyle: "block",
+        fontSize: 16,
+        fontFamily:
+          '"TX-02-XlabMono", "TX02Mono", "TX-02 Mono", "SFMono-Regular", "IBM Plex Mono", ui-monospace, monospace',
+        scrollback: 10_000,
+        allowTransparency: false,
+        theme: {
+          background: cssVar("--terminal-background", "#0b0f14"),
+          foreground: cssVar("--terminal-foreground", "#edf4ff"),
+          cursor: cssVar("--terminal-cursor", "#9ca3af"),
+          cursorAccent: cssVar("--terminal-background", "#0b0f14"),
+          selectionBackground: cssVar(
+            "--terminal-selection",
+            "rgba(103, 200, 255, 0.22)",
+          ),
+        },
+      });
 
-      restty.applyTheme(theme, "chudcode");
-      restty.setFontSize(16);
-      resttyReady = true;
+      const nextFitAddon = new FitAddon();
+      const nextSandboxAddon = new SandboxAddon({
+        reconnect: true,
+        getWebSocketUrl: ({ sandboxId, sessionId, origin }) => {
+          const url = new URL(`/api/terminal/${sandboxId}`, origin);
+          if (sessionId) {
+            url.searchParams.set("session", sessionId);
+          }
+          return url.toString();
+        },
+        onStateChange: (state, error) => {
+          if (state === "connecting") {
+            terminalState = "connecting";
+            terminalError = "";
+            return;
+          }
+
+          if (state === "connected") {
+            terminalState = "open";
+            terminalError = "";
+            requestAnimationFrame(() => {
+              fitTerminal();
+            });
+            return;
+          }
+
+          if (error) {
+            terminalState = "error";
+            terminalError = error.message;
+            return;
+          }
+
+          if (terminalState !== "error") {
+            terminalState = "closed";
+          }
+        },
+      });
+
+      nextTerminal.loadAddon(nextFitAddon);
+      nextTerminal.loadAddon(nextSandboxAddon);
+      nextTerminal.open(terminalElement);
+
+      terminal = nextTerminal;
+      fitAddon = nextFitAddon;
+      sandboxAddon = nextSandboxAddon;
+      terminalReady = true;
+
+      observeTerminal();
       fitTerminal();
-      syncPtySize();
 
       if (sandbox.state === "running") {
-        await openTerminal();
-        requestAnimationFrame(() => {
-          fitTerminal();
-          syncPtySize();
-        });
-        setTimeout(() => {
-          fitTerminal();
-          syncPtySize();
-        }, 150);
+        openTerminal();
       }
     })().catch((error) => {
       terminalState = "error";
@@ -420,37 +210,37 @@ selection-background = ${cssVar("--terminal-selection", "rgba(103, 200, 255, 0.2
     return () => {
       disposed = true;
       cleanupTerminalConnection();
-      ptyTransport?.destroy?.();
-      ptyTransport = null;
-      restty?.destroy();
-      restty = null;
-      resttyReady = false;
-      lastTermSize = null;
+      sandboxAddon?.dispose();
+      sandboxAddon = null;
+      fitAddon?.dispose?.();
+      fitAddon = null;
+      terminal?.dispose();
+      terminal = null;
+      terminalReady = false;
     };
   });
 
   $effect(() => {
     if (!visible) {
       cleanupResizeObserver();
-      restty?.blur();
+      terminal?.blur?.();
       return;
     }
 
-    if (resttyReady && restty) {
+    if (terminalReady) {
       observeTerminal();
       fitTerminal();
-      syncPtySize();
     }
   });
 
   $effect(() => {
-    if (resttyReady && sandbox.state === "running" && terminalState === "idle" && restty) {
-      void openTerminal();
+    if (terminalReady && sandbox.state === "running" && terminalState === "idle") {
+      openTerminal();
     }
   });
 
   $effect(() => {
-    if (resttyReady && active && visible && restty) {
+    if (terminalReady && active && visible) {
       void syncActiveTerminal();
     }
   });

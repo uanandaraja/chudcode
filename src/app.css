@@ -169,7 +169,10 @@
   .terminal-shell,
   .terminal-shell > div,
   .terminal-host,
-  .terminal-shell canvas {
+  .terminal-shell canvas,
+  .terminal-host .xterm,
+  .terminal-host .xterm-screen,
+  .terminal-host .xterm-viewport {
     background-color: var(--terminal-background);
   }
 
@@ -178,6 +181,20 @@
     overflow: hidden;
     overscroll-behavior: contain;
     touch-action: pan-y pinch-zoom;
+  }
+
+  .terminal-host .xterm {
+    block-size: 100%;
+    padding: 0.75rem;
+  }
+
+  .terminal-host .xterm-viewport {
+    scrollbar-color: color-mix(in oklch, var(--foreground) 24%, transparent)
+      transparent;
+  }
+
+  .terminal-host .xterm-screen canvas {
+    background-color: transparent;
   }
 
   .terminal-shell canvas {
