@@ -5,7 +5,7 @@ ENV HOME=/workspace
 ENV XDG_CONFIG_HOME=/workspace/.config
 ENV BUN_INSTALL=/workspace/.bun
 ENV NPM_CONFIG_PREFIX=/workspace/.npm-global
-ENV SHELL=/bin/bash
+ENV SHELL=/usr/bin/fish
 ENV PATH=/workspace/.bun/bin:/workspace/.local/bin:/workspace/.npm-global/bin:/workspace/.opencode/bin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin
 
 RUN apt-get update \
@@ -45,11 +45,23 @@ RUN apt-get update \
 
 RUN curl -fsSL https://bun.sh/install | bash
 
+COPY src/cloudflare/config/fish/config.fish /usr/local/share/chudcode/fish/config.fish
+COPY src/cloudflare/config/starship.toml /usr/local/share/chudcode/starship.toml
+
 RUN mkdir -p /workspace/.config/gh /workspace/.local/bin /workspace/.npm-global \
   && npm config set prefix /workspace/.npm-global \
-  && python3 -m pip install --break-system-packages uv \
-  && npm install -g wrangler@4.75.0 @openai/codex@0.115.0 @mariozechner/pi-coding-agent@0.57.1 \
-  && (curl -fsSL https://claude.ai/install.sh | bash || true) \
-  && (curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path || true)
+  && python3 -m pip install --break-system-packages uv
+
+RUN curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /usr/local/bin
+
+RUN npm install -g wrangler@4.75.0 @openai/codex@0.115.0 @mariozechner/pi-coding-agent@0.57.1
+
+RUN timeout 120s bash -lc 'curl -fsSL https://claude.ai/install.sh | bash' || true
+
+RUN timeout 120s bash -lc 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path' || true
+
+RUN mkdir -p /workspace/.config/fish \
+  && ln -sf /usr/local/share/chudcode/fish/config.fish /workspace/.config/fish/config.fish \
+  && ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml
 
 WORKDIR /workspace

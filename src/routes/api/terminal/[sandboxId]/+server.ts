@@ -23,5 +23,5 @@ export const GET: RequestHandler = async ({ params, platform, request, url }) =>
     sessionId,
   );
 
-  return session.terminal(request, { shell: "/bin/bash" });
+  return session.terminal(request, { shell: "/usr/bin/fish" });
 };

@@ -108,7 +108,7 @@ function getSandboxEnv(env: PlatformEnv) {
     XDG_CONFIG_HOME: "/workspace/.config",
     LOGNAME: "workspace",
     USER: "workspace",
-    SHELL: "/bin/bash",
+    SHELL: "/usr/bin/fish",
     EDITOR: "nvim",
     VISUAL: "nvim",
     PAGER: "less",
@@ -271,6 +271,9 @@ async function bootstrapWorkspace(
 
   const bootstrapCommands = [
     "mkdir -p /workspace/.config/gh",
+    "mkdir -p /workspace/.config/fish",
+    "ln -sf /usr/local/share/chudcode/fish/config.fish /workspace/.config/fish/config.fish",
+    "ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml",
     env.GITHUB_TOKEN
       ? [
           "printf '%s' \"$GITHUB_TOKEN\" | HOME=/workspace XDG_CONFIG_HOME=/workspace/.config gh auth login --hostname github.com --with-token >/dev/null 2>&1 || true",
