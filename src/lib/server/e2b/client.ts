@@ -274,8 +274,6 @@ async function provisionWorkspaceSandbox(
     );
   }
 
-  bootstrapSteps.push("test -f /home/user/.config/gh/hosts.yml");
-
   try {
     await sandbox.commands.run(bootstrapSteps.join(" && "), {
       user: "user",
@@ -291,7 +289,7 @@ async function provisionWorkspaceSandbox(
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Sandbox bootstrap failed before gh auth state was persisted: ${message}`);
+    throw new Error(`Sandbox bootstrap failed: ${message}`);
   }
 }
 
