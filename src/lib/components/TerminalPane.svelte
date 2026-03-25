@@ -179,6 +179,7 @@
     let socket: WebSocket | null = null;
     let callbacks: PtyCallbacks = {};
     const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
     const suppressedReplies = ["\u001b[?1;2c"];
 
     const closeSocket = () => {
@@ -306,7 +307,7 @@
 
         if (!payload) return true;
 
-        socket.send(JSON.stringify({ type: "input", data: payload }));
+        socket.send(encoder.encode(payload));
         return true;
       },
       resize(cols, rows, meta) {
