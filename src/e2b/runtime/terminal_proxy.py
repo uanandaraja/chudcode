@@ -16,12 +16,12 @@ import websockets
 
 
 PORT = int(os.environ.get("E2B_TERMINAL_PORT", "7681"))
-DEFAULT_WORKDIR = os.environ.get("WERKBENCH_CWD", "/home/user/workspace")
-DEFAULT_COMMAND = os.environ.get("WERKBENCH_TERMINAL_COMMAND", "fish -l")
+DEFAULT_WORKDIR = os.environ.get("CHUDCODE_CWD", "/home/user/workspace")
+DEFAULT_COMMAND = os.environ.get("CHUDCODE_TERMINAL_COMMAND", "fish -l")
 SESSION_CONFIG_PATH = Path(
     os.environ.get(
-        "WERKBENCH_TERMINAL_CONFIG_PATH",
-        "/home/user/.cache/werkbench/terminal-session.json",
+        "CHUDCODE_TERMINAL_CONFIG_PATH",
+        "/home/user/.cache/chudcode/terminal-session.json",
     )
 )
 

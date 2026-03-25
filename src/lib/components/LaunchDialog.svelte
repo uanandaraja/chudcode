@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type { Workspace } from "$lib/werkbench/types";
-  import { launchWorkspace } from "$lib/remote/werkbench.remote";
+  import type { Workspace } from "$lib/chudcode/types";
+  import { launchWorkspace } from "$lib/remote/chudcode.remote";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Rocket, X, GitBranch, GithubLogo } from "phosphor-svelte";
 

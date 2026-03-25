@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import type { ListedSandbox } from "$lib/werkbench/types";
+  import type { ListedSandbox } from "$lib/chudcode/types";
   import { WarningCircle, X } from "phosphor-svelte";
 
   let {
@@ -388,7 +388,7 @@ cursor-color = ${cssVar("--terminal-cursor", "#9ca3af")}
 selection-background = ${cssVar("--terminal-selection", "rgba(103, 200, 255, 0.22)")}
 `);
 
-      restty.applyTheme(theme, "werkbench");
+      restty.applyTheme(theme, "chudcode");
       restty.setFontSize(16);
       resttyReady = true;
       fitTerminal();

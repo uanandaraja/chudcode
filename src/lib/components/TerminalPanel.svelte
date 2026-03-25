@@ -5,8 +5,8 @@
     BrowserSession,
     ListedSandbox,
     PreviewCandidate,
-  } from "$lib/werkbench/types";
-  import { resumeSandboxCommand } from "$lib/remote/werkbench.remote";
+  } from "$lib/chudcode/types";
+  import { resumeSandboxCommand } from "$lib/remote/chudcode.remote";
   import { Button } from "$lib/components/ui/button/index.js";
   import TerminalPane from "$lib/components/TerminalPane.svelte";
   import {

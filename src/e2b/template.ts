@@ -75,11 +75,11 @@ export const template = Template()
     user: "root",
     mode: 0o755,
   })
-  .copy("runtime/config/fish/config.fish", "/usr/local/share/werkbench/fish/config.fish", {
+  .copy("runtime/config/fish/config.fish", "/usr/local/share/chudcode/fish/config.fish", {
     user: "root",
     mode: 0o644,
   })
-  .copy("runtime/config/starship.toml", "/usr/local/share/werkbench/starship.toml", {
+  .copy("runtime/config/starship.toml", "/usr/local/share/chudcode/starship.toml", {
     user: "root",
     mode: 0o644,
   })
@@ -156,8 +156,8 @@ export const template = Template()
   .runCmd(
     [
       "mkdir -p $HOME/.config/fish",
-      "ln -sf /usr/local/share/werkbench/fish/config.fish $HOME/.config/fish/config.fish",
-      "ln -sf /usr/local/share/werkbench/starship.toml $HOME/.config/starship.toml",
+      "ln -sf /usr/local/share/chudcode/fish/config.fish $HOME/.config/fish/config.fish",
+      "ln -sf /usr/local/share/chudcode/starship.toml $HOME/.config/starship.toml",
       "rm -f $HOME/.tmux.conf",
     ].join(" && "),
   )

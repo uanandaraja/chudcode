@@ -3,7 +3,7 @@
   import "../app.css";
   import { goto, invalidateAll } from "$app/navigation";
   import type { LayoutData } from "./$types";
-  import type { Workspace } from "$lib/werkbench/types";
+  import type { Workspace } from "$lib/chudcode/types";
   import Sidebar from "$lib/components/Sidebar.svelte";
   import WorkspaceModal from "$lib/components/WorkspaceModal.svelte";
   import LaunchDialog from "$lib/components/LaunchDialog.svelte";

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-mkdir -p /run/sshd /var/log/e2b /home/user/.ssh /home/user/.cache/werkbench
+mkdir -p /run/sshd /var/log/e2b /home/user/.ssh /home/user/.cache/chudcode
 rm -f /tmp/e2b-ssh-ready /tmp/e2b-terminal-ready /tmp/e2b-ready
 chmod 700 /home/user/.ssh
-chown -R user:user /home/user/.ssh /home/user/.cache/werkbench
+chown -R user:user /home/user/.ssh /home/user/.cache/chudcode
 
 if [ -n "${E2B_SSH_AUTHORIZED_KEY:-}" ]; then
   printf '%s\n' "${E2B_SSH_AUTHORIZED_KEY}" > /home/user/.ssh/authorized_keys
@@ -12,13 +12,13 @@ if [ -n "${E2B_SSH_AUTHORIZED_KEY:-}" ]; then
   chown user:user /home/user/.ssh/authorized_keys
 fi
 
-BOOTSTRAP_MARKER="/home/user/.cache/werkbench/bootstrap.done"
-BOOTSTRAP_CWD="${WERKBENCH_CWD:-/home/user/workspace}"
+BOOTSTRAP_MARKER="/home/user/.cache/chudcode/bootstrap.done"
+BOOTSTRAP_CWD="${CHUDCODE_CWD:-/home/user/workspace}"
 USER_HOME="/home/user"
 USER_NAME="user"
-REPO_OWNER="${WERKBENCH_REPO_OWNER:-}"
-REPO_NAME="${WERKBENCH_REPO_NAME:-}"
-REPO_DEFAULT_BRANCH="${WERKBENCH_REPO_DEFAULT_BRANCH:-}"
+REPO_OWNER="${CHUDCODE_REPO_OWNER:-}"
+REPO_NAME="${CHUDCODE_REPO_NAME:-}"
+REPO_DEFAULT_BRANCH="${CHUDCODE_REPO_DEFAULT_BRANCH:-}"
 REPO_URL=""
 REPO_DIR="${BOOTSTRAP_CWD}"
 
@@ -39,14 +39,14 @@ sudo -u "${USER_NAME}" env \
     && if [ -n \"${GH_TOKEN:-}\" ]; then gh auth setup-git >/dev/null 2>&1 || true; fi" \
   >/var/log/e2b/github-auth.log 2>&1
 
-if [ -n "${WERKBENCH_BOOTSTRAP_COMMAND:-}" ] && [ ! -f "${BOOTSTRAP_MARKER}" ]; then
+if [ -n "${CHUDCODE_BOOTSTRAP_COMMAND:-}" ] && [ ! -f "${BOOTSTRAP_MARKER}" ]; then
   sudo -u "${USER_NAME}" env \
     HOME="${USER_HOME}" \
     USER="${USER_NAME}" \
     LOGNAME="${USER_NAME}" \
-    WERKBENCH_CWD="${BOOTSTRAP_CWD}" \
+    CHUDCODE_CWD="${BOOTSTRAP_CWD}" \
     bash -lc \
-    "cd \"${BOOTSTRAP_CWD}\" && ${WERKBENCH_BOOTSTRAP_COMMAND}" \
+    "cd \"${BOOTSTRAP_CWD}\" && ${CHUDCODE_BOOTSTRAP_COMMAND}" \
     >/var/log/e2b/bootstrap.log 2>&1
   touch "${BOOTSTRAP_MARKER}"
   chown "${USER_NAME}:${USER_NAME}" "${BOOTSTRAP_MARKER}"

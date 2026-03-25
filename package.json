@@ -1,5 +1,5 @@
 {
-  "name": "werkbench",
+  "name": "chudcode",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -16,8 +16,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "build:template:dev": "bun run src/e2b/build-template.ts werkbench-dev",
-    "build:template:prod": "bun run src/e2b/build-template.ts werkbench",
+    "build:template:dev": "bun run src/e2b/build-template.ts chudcode-dev",
+    "build:template:prod": "bun run src/e2b/build-template.ts chudcode",
     "sandbox:create": "bun run src/e2b/create-sandbox.ts",
     "sandbox:list": "bun run src/e2b/list-sandboxes.ts",
     "sandbox:connect": "bun run src/e2b/connect-sandbox.ts",

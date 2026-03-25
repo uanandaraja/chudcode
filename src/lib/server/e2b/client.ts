@@ -5,7 +5,7 @@ import type {
   PreviewCandidate,
   SandboxDetail,
   Workspace,
-} from "$lib/werkbench/types";
+} from "$lib/chudcode/types";
 import type { PlatformEnv, WorkspaceLaunchEnv } from "$lib/server/env";
 
 const defaultBrowserDebugPort = 9222;
@@ -256,8 +256,8 @@ async function provisionWorkspaceSandbox(
     timeoutMs: getDefaultTimeoutMs(env),
   });
   const bootstrapSteps = [
-    "mkdir -p /home/user/.cache/werkbench /home/user/workspace",
-    `printf '%s' ${shellEscape(terminalConfig)} > /home/user/.cache/werkbench/terminal-session.json`,
+    "mkdir -p /home/user/.cache/chudcode /home/user/workspace",
+    `printf '%s' ${shellEscape(terminalConfig)} > /home/user/.cache/chudcode/terminal-session.json`,
     "mkdir -p /home/user/.config/gh",
     `if [ ! -f /home/user/.config/gh/hosts.yml ]; then printf '%s' \"$GITHUB_TOKEN\" | env -u GH_TOKEN -u GITHUB_TOKEN gh auth login --with-token --hostname github.com --git-protocol https --insecure-storage; fi`,
     "git config --global --unset-all credential.helper >/dev/null 2>&1 || true",
@@ -302,7 +302,7 @@ export async function createSandbox(env: WorkspaceLaunchEnv, workspace: Workspac
       timeout: getTimeoutSeconds(timeoutMs),
       autoPause: true,
       metadata: {
-        kind: "werkbench",
+        kind: "chudcode",
         workspaceId: workspace.id,
         workspaceName: workspace.name,
         repoOwner: workspace.owner,

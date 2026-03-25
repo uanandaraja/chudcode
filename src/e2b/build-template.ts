@@ -1,7 +1,7 @@
 import { Template, defaultBuildLogger } from "e2b";
 import { template } from "./template";
 
-const alias = Bun.argv[2] ?? process.env.E2B_TEMPLATE_ALIAS ?? "werkbench-dev";
+const alias = Bun.argv[2] ?? process.env.E2B_TEMPLATE_ALIAS ?? "chudcode-dev";
 
 await Template.build(template, alias, {
   cpuCount: Number(process.env.E2B_TEMPLATE_CPU_COUNT ?? 4),

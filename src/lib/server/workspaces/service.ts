@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/d1";
-import type { Workspace, WorkspaceInput } from "$lib/werkbench/types";
+import type { Workspace, WorkspaceInput } from "$lib/chudcode/types";
 import type { PlatformEnv } from "$lib/server/env";
 import { workspacesTable } from "./schema";
 

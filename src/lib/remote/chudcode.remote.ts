@@ -1,5 +1,5 @@
 import { command, query } from "$app/server";
-import type { DashboardData } from "$lib/werkbench/types";
+import type { DashboardData } from "$lib/chudcode/types";
 import { getPlatformEnv, type WorkspaceLaunchEnv } from "$lib/server/env";
 import {
   createSandbox,

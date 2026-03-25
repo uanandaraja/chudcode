@@ -16,7 +16,7 @@ const handler: RequestHandler = async ({ params, request }) => {
 
   const upstreamResponse = await fetch(upstreamUrl, {
     headers: {
-      "user-agent": request.headers.get("user-agent") ?? "werkbench-devtools-proxy",
+      "user-agent": request.headers.get("user-agent") ?? "chudcode-devtools-proxy",
     },
     redirect: "follow",
   });

@@ -1,13 +1,13 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { goto, invalidateAll } from "$app/navigation";
-  import type { Workspace, ListedSandbox } from "$lib/werkbench/types";
+  import type { Workspace, ListedSandbox } from "$lib/chudcode/types";
   import {
     deleteWorkspaceCommand,
     killSandboxCommand,
     pauseSandboxCommand,
     resumeSandboxCommand,
-  } from "$lib/remote/werkbench.remote";
+  } from "$lib/remote/chudcode.remote";
   import { CaretDown, CaretRight, Pause, Play, Plus, Terminal, Trash } from "phosphor-svelte";
 
   let {
@@ -188,7 +188,7 @@
   <div class="flex h-11 items-center border-b border-sidebar-divider px-4">
     <div class="flex items-center gap-2">
       <Terminal class="size-4 text-foreground/60" />
-      <span class="font-mono text-sm font-semibold tracking-[0.15em] text-foreground/80">WERKBENCH</span>
+      <span class="font-mono text-sm font-semibold tracking-[0.15em] text-foreground/80">CHUDCODE</span>
     </div>
   </div>
 
