@@ -132,7 +132,7 @@
       const nextTerminal = new Terminal({
         cursorBlink: true,
         cursorStyle: "block",
-        fontSize: 16,
+        fontSize: 14,
         fontFamily:
           '"TX-02-XlabMono", "TX02Mono", "TX-02 Mono", "SFMono-Regular", "IBM Plex Mono", ui-monospace, monospace',
         scrollback: 10_000,
