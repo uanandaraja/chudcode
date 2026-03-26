@@ -262,6 +262,9 @@ async function ensureWorkspaceRuntime(
     [
       "mkdir -p /workspace/.config/gh",
       "ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc",
+      "ln -sf /usr/local/share/chudcode/bash/bash_profile /workspace/.bash_profile",
+      "ln -sf /usr/local/share/chudcode/bash/bash_profile /workspace/.profile",
+      "ln -sf /usr/local/share/chudcode/tmux/tmux.conf /workspace/.tmux.conf",
       "ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml",
     ].join(" && "),
     {

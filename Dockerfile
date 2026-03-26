@@ -45,6 +45,8 @@ RUN apt-get update \
 RUN curl -fsSL https://bun.sh/install | bash
 
 COPY src/cloudflare/config/bash/bashrc /usr/local/share/chudcode/bash/bashrc
+COPY src/cloudflare/config/bash/bash_profile /usr/local/share/chudcode/bash/bash_profile
+COPY src/cloudflare/config/tmux/tmux.conf /usr/local/share/chudcode/tmux/tmux.conf
 COPY src/cloudflare/config/starship.toml /usr/local/share/chudcode/starship.toml
 
 RUN mkdir -p /workspace/.config/gh /workspace/.local/bin /workspace/.npm-global \
@@ -60,6 +62,9 @@ RUN timeout 120s bash -lc 'curl -fsSL https://claude.ai/install.sh | bash' || tr
 RUN timeout 120s bash -lc 'curl -fsSL https://opencode.ai/install | bash -s -- --no-modify-path' || true
 
 RUN ln -sf /usr/local/share/chudcode/bash/bashrc /workspace/.bashrc \
+  && ln -sf /usr/local/share/chudcode/bash/bash_profile /workspace/.bash_profile \
+  && ln -sf /usr/local/share/chudcode/bash/bash_profile /workspace/.profile \
+  && ln -sf /usr/local/share/chudcode/tmux/tmux.conf /workspace/.tmux.conf \
   && ln -sf /usr/local/share/chudcode/starship.toml /workspace/.config/starship.toml
 
 WORKDIR /workspace
